@@ -48,6 +48,12 @@ namespace FluidSimulation
             void addForces(double dt);
 
             /**
+             * 平流温度和密度场
+             * @param dt 时间步长
+             */
+            void advectScalars(double dt);
+
+            /**
              * 压力投影，保证不可压缩
              * @param dt 时间步长
              */

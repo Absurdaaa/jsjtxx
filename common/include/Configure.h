@@ -1,6 +1,6 @@
 /**
- * Configure.h: ÏµÍ³ÅäÖÃÎÄ¼ş
- * ¶¨ÒåÏµÍ³µÄ¸÷ÖÖÅäÖÃ²ÎÊıºÍÈ«¾Ö±äÁ¿
+ * Configure.h: ÏµÍ³ï¿½ï¿½ï¿½ï¿½ï¿½Ä¼ï¿½
+ * ï¿½ï¿½ï¿½ï¿½ÏµÍ³ï¿½Ä¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã²ï¿½ï¿½ï¿½ï¿½ï¿½È«ï¿½Ö±ï¿½ï¿½ï¿½
  */
 
 #pragma once
@@ -14,10 +14,10 @@
 #include "glm/glm.hpp"
 
 /**
- * ÏßĞÔ²åÖµºê
- * @param a ÆğÊ¼Öµ
- * @param b ½áÊøÖµ
- * @param t ²åÖµ²ÎÊı [0,1]
+ * ï¿½ï¿½ï¿½Ô²ï¿½Öµï¿½ï¿½
+ * @param a ï¿½ï¿½Ê¼Öµ
+ * @param b ï¿½ï¿½ï¿½ï¿½Öµ
+ * @param t ï¿½ï¿½Öµï¿½ï¿½ï¿½ï¿½ [0,1]
  */
 #define LERP(a, b, t) (1 - t) * a + t *b
 
@@ -26,29 +26,29 @@
 #define min(a, b) (((a) < (b)) ? (a) : (b))
 #endif
 
-// äÖÈ¾·Ö±æÂÊ
-extern int imageWidth;      // äÖÈ¾Í¼Ïñ¿í¶È
-extern int imageHeight;     // äÖÈ¾Í¼Ïñ¸ß¶È
+// ï¿½ï¿½È¾ï¿½Ö±ï¿½ï¿½ï¿½
+extern int imageWidth;      // ï¿½ï¿½È¾Í¼ï¿½ï¿½ï¿½ï¿½ï¿½
+extern int imageHeight;     // ï¿½ï¿½È¾Í¼ï¿½ï¿½ß¶ï¿½
 
-// ´°¿Ú³ß´ç
-extern int windowWidth;     // ´°¿Ú¿í¶È
-extern int windowHeight;    // ´°¿Ú¸ß¶È
+// ï¿½ï¿½ï¿½Ú³ß´ï¿½
+extern int windowWidth;     // ï¿½ï¿½ï¿½Ú¿ï¿½ï¿½ï¿½
+extern int windowHeight;    // ï¿½ï¿½ï¿½Ú¸ß¶ï¿½
 
-// UIÉèÖÃ
-extern float fontSize;      // ×ÖÌå´óĞ¡
+// UIï¿½ï¿½ï¿½ï¿½
+extern float fontSize;      // ï¿½ï¿½ï¿½ï¿½ï¿½Ğ¡
 
-// ·ÂÕæ×´Ì¬
-extern bool simulating;     // ÊÇ·ñÕıÔÚ·ÂÕæ
+// ï¿½ï¿½ï¿½ï¿½×´Ì¬
+extern bool simulating;     // ï¿½Ç·ï¿½ï¿½ï¿½ï¿½Ú·ï¿½ï¿½ï¿½
 
 /**
- * 2DÅ·À­·½·¨²ÎÊıÃüÃû¿Õ¼ä
- * °üº¬2DÅ·À­Á÷Ìå·ÂÕæµÄËùÓĞÅäÖÃ²ÎÊı
+ * 2DÅ·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Õ¼ï¿½
+ * ï¿½ï¿½ï¿½ï¿½2DÅ·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã²ï¿½ï¿½ï¿½
  */
 namespace Eulerian2dPara
 {
     /**
-     * ÑÌÎíÔ´½á¹¹Ìå
-     * ¶¨ÒåÑÌÎíÔ´µÄ³õÊ¼Î»ÖÃ¡¢ËÙ¶È¡¢ÃÜ¶ÈºÍÎÂ¶È
+     * ï¿½ï¿½ï¿½ï¿½Ô´ï¿½á¹¹ï¿½ï¿½
+     * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô´ï¿½Ä³ï¿½Ê¼Î»ï¿½Ã¡ï¿½ï¿½Ù¶È¡ï¿½ï¿½Ü¶Èºï¿½ï¿½Â¶ï¿½
      */
     struct SourceSmoke {
         glm::ivec2 position = glm::ivec2(0);
@@ -77,14 +77,14 @@ namespace Eulerian2dPara
 }
 
 /**
- * 3DÅ·À­·½·¨²ÎÊıÃüÃû¿Õ¼ä
- * °üº¬3DÅ·À­Á÷Ìå·ÂÕæµÄËùÓĞÅäÖÃ²ÎÊı
+ * 3DÅ·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Õ¼ï¿½
+ * ï¿½ï¿½ï¿½ï¿½3DÅ·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã²ï¿½ï¿½ï¿½
  */
 namespace Eulerian3dPara
 {
     /**
-     * ÑÌÎíÔ´½á¹¹Ìå
-     * ¶¨ÒåÑÌÎíÔ´µÄ³õÊ¼Î»ÖÃ¡¢ËÙ¶È¡¢ÃÜ¶ÈºÍÎÂ¶È
+     * ï¿½ï¿½ï¿½ï¿½Ô´ï¿½á¹¹ï¿½ï¿½
+     * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô´ï¿½Ä³ï¿½Ê¼Î»ï¿½Ã¡ï¿½ï¿½Ù¶È¡ï¿½ï¿½Ü¶Èºï¿½ï¿½Â¶ï¿½
      */
     struct SourceSmoke {
         glm::ivec3 position = glm::ivec3(0);
@@ -125,24 +125,24 @@ namespace Eulerian3dPara
 }
 
 /**
- * 2D PIC »ìºÏ·½·¨²ÎÊıÃüÃû¿Õ¼ä
+ * 2D PIC æ··åˆæ–¹æ³•å‚æ•°å‘½åç©ºé—´
  */
 namespace PIC2dPara
 {
-    extern int particlesPerStep;   // Ã¿¸öÔ´Ã¿²½·¢ÉäÁ£×ÓÊı
-    extern float emissionJitter;   // ·¢Éä¶¶¶¯ÏµÊı£¨ÒÔcell sizeÎªµ¥Î»£©
-    extern float wallRestitution;  // ±ß½çµ¯ĞÔÏµÊı
+    extern int particlesPerStep;   // æ¯ä¸ªæºæ¯æ­¥å‘å°„ç²’å­æ•°
+    extern float emissionJitter;   // å‘å°„æŠ–åŠ¨ç³»æ•°ï¼ˆä»¥cell sizeä¸ºå•ä½ï¼‰
+    extern float wallRestitution;  // è¾¹ç•Œå¼¹æ€§ç³»æ•°
 }
 
 /**
- * 2DÀ­¸ñÀÊÈÕ·½·¨²ÎÊıÃüÃû¿Õ¼ä
- * °üº¬2DÀ­¸ñÀÊÈÕÁ÷Ìå·ÂÕæµÄËùÓĞÅäÖÃ²ÎÊı
+ * 2Dï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Õ·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Õ¼ï¿½
+ * ï¿½ï¿½ï¿½ï¿½2Dï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã²ï¿½ï¿½ï¿½
  */
 namespace Lagrangian2dPara
 {
     /**
-     * Á÷Ìå¿é½á¹¹Ìå
-     * ¶¨Òå³õÊ¼Á÷Ìå¿éµÄÎ»ÖÃ¡¢´óĞ¡¡¢³õÊ¼ËÙ¶ÈºÍÁ£×Ó¼ä¾à
+     * ï¿½ï¿½ï¿½ï¿½ï¿½á¹¹ï¿½ï¿½
+     * ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î»ï¿½Ã¡ï¿½ï¿½ï¿½Ğ¡ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½Ù¶Èºï¿½ï¿½ï¿½ï¿½Ó¼ï¿½ï¿½
      */
     struct FluidBlock {
         glm::vec2 lowerCorner = glm::vec2(0.0f, 0.0f);
@@ -160,23 +160,23 @@ namespace Lagrangian2dPara
     extern float velocityAttenuation;
     extern float eps;
 
-    extern float supportRadius;// ÔÚ´Ë°ë¾¶ÄÚµÄÏàÁÚÁ£×Ó»á¶Ôµ±Ç°Á£×Ó²úÉúÓ°Ïì
-    extern float particleRadius;// Á£×Ó°ë¾¶
-    extern float particleDiameter;// Á£×ÓÖ±¾¶
-    extern float gravityX;// xÖáÉÏµÄ¼ÓËÙ¶È
-    extern float gravityY;// yÖáÉÏµÄ¼ÓËÙ¶È
-    extern float density;// Á÷ÌåÃÜ¶È
-    extern float stiffness;// ¸Õ¶È
-    extern float exponent;// Ñ¹Á¦¼ÆËã¹«Ê½ÖĞµÄÖ¸Êı
-    extern float viscosity;// Õ³¶È
+    extern float supportRadius;// ï¿½Ú´Ë°ë¾¶ï¿½Úµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó»ï¿½Ôµï¿½Ç°ï¿½ï¿½ï¿½Ó²ï¿½ï¿½ï¿½Ó°ï¿½ï¿½
+    extern float particleRadius;// ï¿½ï¿½ï¿½Ó°ë¾¶
+    extern float particleDiameter;// ï¿½ï¿½ï¿½ï¿½Ö±ï¿½ï¿½
+    extern float gravityX;// xï¿½ï¿½ï¿½ÏµÄ¼ï¿½ï¿½Ù¶ï¿½
+    extern float gravityY;// yï¿½ï¿½ï¿½ÏµÄ¼ï¿½ï¿½Ù¶ï¿½
+    extern float density;// ï¿½ï¿½ï¿½ï¿½ï¿½Ü¶ï¿½
+    extern float stiffness;// ï¿½Õ¶ï¿½
+    extern float exponent;// Ñ¹ï¿½ï¿½ï¿½ï¿½ï¿½ã¹«Ê½ï¿½Ğµï¿½Ö¸ï¿½ï¿½
+    extern float viscosity;// Õ³ï¿½ï¿½
 }
 
-// 2DÀ­¸ñÀÊÈÕÅçÈª³¡¾°²ÎÊı
+// 2Dï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Èªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 namespace Lagrangian2dFountainPara
 {
         /**
-     * Á÷Ìå¿é½á¹¹Ìå
-     * ¶¨Òå³õÊ¼Á÷Ìå¿éµÄÎ»ÖÃ¡¢´óĞ¡¡¢³õÊ¼ËÙ¶ÈºÍÁ£×Ó¼ä¾à
+     * ï¿½ï¿½ï¿½ï¿½ï¿½á¹¹ï¿½ï¿½
+     * ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î»ï¿½Ã¡ï¿½ï¿½ï¿½Ğ¡ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½Ù¶Èºï¿½ï¿½ï¿½ï¿½Ó¼ï¿½ï¿½
      */
 
     extern float scale;
@@ -187,39 +187,39 @@ namespace Lagrangian2dFountainPara
     extern float velocityAttenuation;
     extern float eps;
 
-    extern float supportRadius;// ÔÚ´Ë°ë¾¶ÄÚµÄÏàÁÚÁ£×Ó»á¶Ôµ±Ç°Á£×Ó²úÉúÓ°Ïì
-    extern float particleRadius;// Á£×Ó°ë¾¶
-    extern float particleDiameter;// Á£×ÓÖ±¾¶
-    extern float gravityX;// xÖáÉÏµÄ¼ÓËÙ¶È
-    extern float gravityY;// yÖáÉÏµÄ¼ÓËÙ¶È
-    extern float density;// Á÷ÌåÃÜ¶È
-    extern float stiffness;// ¸Õ¶È
-    extern float exponent;// Ñ¹Á¦¼ÆËã¹«Ê½ÖĞµÄÖ¸Êı
-    extern float viscosity;// Õ³¶È
+    extern float supportRadius;// ï¿½Ú´Ë°ë¾¶ï¿½Úµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó»ï¿½Ôµï¿½Ç°ï¿½ï¿½ï¿½Ó²ï¿½ï¿½ï¿½Ó°ï¿½ï¿½
+    extern float particleRadius;// ï¿½ï¿½ï¿½Ó°ë¾¶
+    extern float particleDiameter;// ï¿½ï¿½ï¿½ï¿½Ö±ï¿½ï¿½
+    extern float gravityX;// xï¿½ï¿½ï¿½ÏµÄ¼ï¿½ï¿½Ù¶ï¿½
+    extern float gravityY;// yï¿½ï¿½ï¿½ÏµÄ¼ï¿½ï¿½Ù¶ï¿½
+    extern float density;// ï¿½ï¿½ï¿½ï¿½ï¿½Ü¶ï¿½
+    extern float stiffness;// ï¿½Õ¶ï¿½
+    extern float exponent;// Ñ¹ï¿½ï¿½ï¿½ï¿½ï¿½ã¹«Ê½ï¿½Ğµï¿½Ö¸ï¿½ï¿½
+    extern float viscosity;// Õ³ï¿½ï¿½
   
   
-    extern glm::vec2 containerLower;   // ÅçÈªÈİÆ÷×óÏÂ½Ç£¨¾ö¶¨ÕûÌå±ß½ç£©
-    extern glm::vec2 containerUpper;   // ÅçÈªÈİÆ÷ÓÒÉÏ½Ç
+    extern glm::vec2 containerLower;   // ï¿½ï¿½Èªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â½Ç£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß½ç£©
+    extern glm::vec2 containerUpper;   // ï¿½ï¿½Èªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï½ï¿½
     
-    extern glm::vec2 emitterLower;     // Åç¿ÚÇøÓò×óÏÂ½Ç£¨Ìù½üµ×²¿ÊµÏÖÁ¢Öù£©
-    extern glm::vec2 emitterUpper;     // Åç¿ÚÇøÓòÓÒÉÏ½Ç£¨¿ØÖÆÅç¿Ú¿í¶È/¸ß¶È£©
-    extern glm::vec2 emitterVelocity;  // Á£×Ó³õÊ¼ËÙ¶È£¨Í¨³£Ö¸Ïò +Y£©
-    extern float emitterJitter;        // ËÙ¶È¶¶¶¯Ç¿¶È£¨½µµÍ¹ı¶È¹æÔòµ¼ÖÂµÄÌõÎÆ£©
+    extern glm::vec2 emitterLower;     // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â½Ç£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×²ï¿½Êµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    extern glm::vec2 emitterUpper;     // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï½Ç£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú¿ï¿½ï¿½ï¿½/ï¿½ß¶È£ï¿½
+    extern glm::vec2 emitterVelocity;  // ï¿½ï¿½ï¿½Ó³ï¿½Ê¼ï¿½Ù¶È£ï¿½Í¨ï¿½ï¿½Ö¸ï¿½ï¿½ +Yï¿½ï¿½
+    extern float emitterJitter;        // ï¿½Ù¶È¶ï¿½ï¿½ï¿½Ç¿ï¿½È£ï¿½ï¿½ï¿½ï¿½Í¹ï¿½ï¿½È¹ï¿½ï¿½ï¿½ï¿½Âµï¿½ï¿½ï¿½ï¿½Æ£ï¿½
     
-    extern float particleSpacing;      // Åç×ìÄÚ²¿Á£×Ó²ÉÑù¼ä¾à
-    extern int particlesPerStep;       // Ã¿Ö¡·¢ÉäµÄÁ£×ÓÊı£¨Ó°ÏìË®ÖùÃÜ¶È£©
-    extern size_t maxParticles;        // Á£×ÓÏµÍ³ÔÊĞí´æÔÚµÄ×î´óÊıÁ¿
+    extern float particleSpacing;      // ï¿½ï¿½ï¿½ï¿½ï¿½Ú²ï¿½ï¿½ï¿½ï¿½Ó²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    extern int particlesPerStep;       // Ã¿Ö¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó°ï¿½ï¿½Ë®ï¿½ï¿½ï¿½Ü¶È£ï¿½
+    extern size_t maxParticles;        // ï¿½ï¿½ï¿½ï¿½ÏµÍ³ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Úµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 }
 
 /**
- * 3DÀ­¸ñÀÊÈÕ·½·¨²ÎÊıÃüÃû¿Õ¼ä
- * °üº¬3DÀ­¸ñÀÊÈÕÁ÷Ìå·ÂÕæµÄËùÓĞÅäÖÃ²ÎÊı
+ * 3Dï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Õ·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Õ¼ï¿½
+ * ï¿½ï¿½ï¿½ï¿½3Dï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã²ï¿½ï¿½ï¿½
  */
 namespace Lagrangian3dPara
 {
     /**
-     * Á÷Ìå¿é½á¹¹Ìå
-     * ¶¨Òå³õÊ¼Á÷Ìå¿éµÄÎ»ÖÃ¡¢´óĞ¡¡¢³õÊ¼ËÙ¶ÈºÍÁ£×Ó¼ä¾à
+     * ï¿½ï¿½ï¿½ï¿½ï¿½á¹¹ï¿½ï¿½
+     * ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î»ï¿½Ã¡ï¿½ï¿½ï¿½Ğ¡ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½Ù¶Èºï¿½ï¿½ï¿½ï¿½Ó¼ï¿½ï¿½
      */
     struct FluidBlock {
         glm::vec3 lowerCorner = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -232,34 +232,34 @@ namespace Lagrangian3dPara
     extern std::vector<FluidBlock> fluidBlocks;
 
 
-    extern float dt;// Ê±¼ä²½³¤
-    extern int substep;// ×Ó²½Êı
-    extern float maxVelocity;// ×î´óÔÊĞíËÙ¶È
-    extern float velocityAttenuation;// Åö×²ºóµÄËÙ¶ÈË¥¼õÏµÊı
-    extern float eps;// Ò»¸öºÜĞ¡µÄ¾àÀë£¬ÓÃÓÚ±ß½ç´¦Àí
+    extern float dt;// Ê±ï¿½ä²½ï¿½ï¿½
+    extern int substep;// ï¿½Ó²ï¿½ï¿½ï¿½
+    extern float maxVelocity;// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ù¶ï¿½
+    extern float velocityAttenuation;// ï¿½ï¿½×²ï¿½ï¿½ï¿½ï¿½Ù¶ï¿½Ë¥ï¿½ï¿½Ïµï¿½ï¿½
+    extern float eps;// Ò»ï¿½ï¿½ï¿½ï¿½Ğ¡ï¿½Ä¾ï¿½ï¿½ë£¬ï¿½ï¿½ï¿½Ú±ß½ç´¦ï¿½ï¿½
 
-    extern float supportRadius;// Ö§³Ö°ë¾¶
-    extern float particleRadius;// Á£×Ó°ë¾¶
-    extern float particleDiameter;// Á£×ÓÖ±¾¶
+    extern float supportRadius;// Ö§ï¿½Ö°ë¾¶
+    extern float particleRadius;// ï¿½ï¿½ï¿½Ó°ë¾¶
+    extern float particleDiameter;// ï¿½ï¿½ï¿½ï¿½Ö±ï¿½ï¿½
 
-    extern float gravityX;// xÖáÖØÁ¦
-    extern float gravityY;// yÖáÖØÁ¦
-    extern float gravityZ;// zÖáÖØÁ¦
+    extern float gravityX;// xï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    extern float gravityY;// yï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    extern float gravityZ;// zï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
-    extern float density;// Á÷ÌåÃÜ¶È
-    extern float stiffness;// ¸Õ¶È
-    extern float exponent;//  Ñ¹Á¦¼ÆËã¹«Ê½ÖĞµÄÖ¸Êı
-    extern float viscosity;// Õ³¶È
+    extern float density;// ï¿½ï¿½ï¿½ï¿½ï¿½Ü¶ï¿½
+    extern float stiffness;// ï¿½Õ¶ï¿½
+    extern float exponent;//  Ñ¹ï¿½ï¿½ï¿½ï¿½ï¿½ã¹«Ê½ï¿½Ğµï¿½Ö¸ï¿½ï¿½
+    extern float viscosity;// Õ³ï¿½ï¿½
     
-    // XPSHÏà¹Ø²ÎÊı
-    extern float xsph_c; // XSPHĞŞÕıÏµÊı
+    // XPSHï¿½ï¿½Ø²ï¿½ï¿½ï¿½
+    extern float xsph_c; // XSPHï¿½ï¿½ï¿½ï¿½Ïµï¿½ï¿½
 }
 
-// ×ÊÔ´Â·¾¶
-extern std::string shaderPath;      // ×ÅÉ«Æ÷ÎÄ¼şÂ·¾¶
-extern std::string picturePath;      // Í¼Æ¬ÎÄ¼şÂ·¾¶
+// ï¿½ï¿½Ô´Â·ï¿½ï¿½
+extern std::string shaderPath;      // ï¿½ï¿½É«ï¿½ï¿½ï¿½Ä¼ï¿½Â·ï¿½ï¿½
+extern std::string picturePath;      // Í¼Æ¬ï¿½Ä¼ï¿½Â·ï¿½ï¿½
 
-// ×é¼ş¹ÜÀí
-extern std::vector<Glb::Component *> methodComponents;  // ËùÓĞ·½·¨×é¼şµÄÁĞ±í
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+extern std::vector<Glb::Component *> methodComponents;  // ï¿½ï¿½ï¿½Ğ·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ğ±ï¿½
 
 #endif // !__CONFIGURE_H__

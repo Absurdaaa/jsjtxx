@@ -2,22 +2,22 @@
 #ifndef __MANAGER_H__
 #define __MANAGER_H__
 
-// OpenGLÏà¹ØÍ·ÎÄ¼þ
+// OpenGLï¿½ï¿½ï¿½Í·ï¿½Ä¼ï¿½
 #include "glad/glad.h"
 #include "glfw3.h"
 
-// ImGuiÏà¹ØÍ·ÎÄ¼þ
+// ImGuiï¿½ï¿½ï¿½Í·ï¿½Ä¼ï¿½
 #include "imgui.h"
 #include "imgui_internal.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 
-// UIÊÓÍ¼Í·ÎÄ¼þ
+// UIï¿½ï¿½Í¼Í·ï¿½Ä¼ï¿½
 #include "SceneView.h"
 #include "InspectorView.h"
 #include "ProjectView.h"
 
-// Á÷ÌåÄ£Äâ×é¼þÍ·ÎÄ¼þ
+// ï¿½ï¿½ï¿½ï¿½Ä£ï¿½ï¿½ï¿½ï¿½ï¿½Í·ï¿½Ä¼ï¿½
 #include "Lagrangian2dComponent.h"
 #include "Lagrangian2dFountainComponent.h"
 #include "Eulerian2dComponent.h"
@@ -33,21 +33,21 @@ namespace FluidSimulation
 	class InspectorView;
 	class ProjectView;
 
-	// UI¹ÜÀíÆ÷Àà(µ¥ÀýÄ£Ê½)
-	// ¸ºÔð¹ÜÀíËùÓÐUIÊÓÍ¼ºÍÁ÷ÌåÄ£Äâ×é¼þ
+	// UIï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½(ï¿½ï¿½ï¿½ï¿½Ä£Ê½)
+	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½UIï¿½ï¿½Í¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä£ï¿½ï¿½ï¿½ï¿½ï¿½
 	class Manager {
 	public:
-		// »ñÈ¡µ¥ÀýÊµÀý
+		// ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½Êµï¿½ï¿½
 		static Manager& getInstance() {
 			static Manager instance;
 			return instance;
 		}
 
-		void init(GLFWwindow* window);      // ³õÊ¼»¯¹ÜÀíÆ÷
-		void displayViews();                // ÏÔÊ¾ËùÓÐÊÓÍ¼
-		void displayToolBar();              // ÏÔÊ¾¹¤¾ßÀ¸
+		void init(GLFWwindow* window);      // ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+		void displayViews();                // ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¼
+		void displayToolBar();              // ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
-		// Getter/Setter·½·¨
+		// Getter/Setterï¿½ï¿½ï¿½ï¿½
 		SceneView* getSceneView() const { return sceneView; };
 		InspectorView* getInspectorView() const { return inspectorView; };
 		ProjectView* getProjectView() const { return projectView; };
@@ -56,7 +56,7 @@ namespace FluidSimulation
 		void setMethod(Glb::Component* method) { currentMethod = method; };
 
 	private:
-		// Ë½ÓÐ¹¹Ôìº¯Êý(µ¥ÀýÄ£Ê½)
+		// Ë½ï¿½Ð¹ï¿½ï¿½ìº¯ï¿½ï¿½(ï¿½ï¿½ï¿½ï¿½Ä£Ê½)
 		Manager() {
 			window = NULL;
 			sceneView = NULL;
@@ -65,16 +65,16 @@ namespace FluidSimulation
 			currentMethod = NULL;
 		};
 
-		// ½ûÖ¹¿½±´ºÍ¸³Öµ(µ¥ÀýÄ£Ê½)
+		// ï¿½ï¿½Ö¹ï¿½ï¿½ï¿½ï¿½ï¿½Í¸ï¿½Öµ(ï¿½ï¿½ï¿½ï¿½Ä£Ê½)
 		Manager(const Manager&) = delete;
 		Manager& operator=(const Manager&) = delete;
 		
-		GLFWwindow* window;                 // GLFW´°¿Ú
-		SceneView* sceneView;               // ³¡¾°ÊÓÍ¼
-		InspectorView* inspectorView;       // ¼ìÊÓÆ÷ÊÓÍ¼
-		ProjectView* projectView;           // ÏîÄ¿ÊÓÍ¼
+		GLFWwindow* window;                 // GLFWï¿½ï¿½ï¿½ï¿½
+		SceneView* sceneView;               // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¼
+		InspectorView* inspectorView;       // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¼
+		ProjectView* projectView;           // ï¿½ï¿½Ä¿ï¿½ï¿½Í¼
 
-		Glb::Component* currentMethod;      // µ±Ç°Ñ¡ÔñµÄÄ£Äâ·½·¨
+		Glb::Component* currentMethod;      // ï¿½ï¿½Ç°Ñ¡ï¿½ï¿½ï¿½Ä£ï¿½â·½ï¿½ï¿½
 	};
 }
 

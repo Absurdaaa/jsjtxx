@@ -1,6 +1,6 @@
 /**
- * Manager.cpp: UI¹ÜÀíÆ÷ÊµÏÖÎÄ¼þ
- * ÊµÏÖUIÏµÍ³µÄ¹ÜÀíºÍÊÓÍ¼ÏÔÊ¾
+ * Manager.cpp: UIï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Êµï¿½ï¿½ï¿½Ä¼ï¿½
+ * Êµï¿½ï¿½UIÏµÍ³ï¿½Ä¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¼ï¿½ï¿½Ê¾
  */
 
 #include "Manager.h"
@@ -8,20 +8,20 @@
 namespace FluidSimulation
 {
     /**
-     * ³õÊ¼»¯¹ÜÀíÆ÷
-     * ´´½¨ËùÓÐÊÓÍ¼²¢×¢²áÁ÷ÌåÄ£Äâ×é¼þ
-     * @param window GLFW´°¿Ú
+     * ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+     * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¼ï¿½ï¿½×¢ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä£ï¿½ï¿½ï¿½ï¿½ï¿½
+     * @param window GLFWï¿½ï¿½ï¿½ï¿½
      */
     void Manager::init(GLFWwindow* window) {
-        // ±£´æ´°¿ÚÖ¸Õë
+        // ï¿½ï¿½ï¿½æ´°ï¿½ï¿½Ö¸ï¿½ï¿½
         this->window = window;
 
-        // ´´½¨¸÷¸öÊÓÍ¼
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¼
         inspectorView = new InspectorView(window);
         projectView =  new ProjectView(window);
         sceneView = new SceneView(window);
 
-        // ´´½¨²¢×¢²áËùÓÐÁ÷ÌåÄ£Äâ×é¼þ
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×¢ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä£ï¿½ï¿½ï¿½ï¿½ï¿½
         int id = 0;
         methodComponents.push_back(new Lagrangian2d::Lagrangian2dComponent("Lagrangian 2d", id++));
         methodComponents.push_back(new Lagrangian2d::Lagrangian2dFountainComponent("Lagrangian 2d Fountain", id++));
@@ -29,36 +29,36 @@ namespace FluidSimulation
         methodComponents.push_back(new PIC2d::PICComponent("PIC 2d", id++));
         methodComponents.push_back(new Lagrangian3d::Lagrangian3dComponent("Lagrangian 3d", id++));
         methodComponents.push_back(new Eulerian3d::Eulerian3dComponent("Eulerian 3d", id++));
-        // TODO(optional): Ìí¼Ó¸ü¶àÄ£Äâ·½·¨
+        // TODO(optional): ï¿½ï¿½ï¿½Ó¸ï¿½ï¿½ï¿½Ä£ï¿½â·½ï¿½ï¿½
     }
 
     /**
-     * ÏÔÊ¾ËùÓÐÊÓÍ¼
-     * ÉèÖÃÍ£¿¿¿Õ¼ä²¢ÏÔÊ¾³¡¾°ÊÓÍ¼¡¢¼ìÊÓÆ÷ÊÓÍ¼ºÍÏîÄ¿ÊÓÍ¼
+     * ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¼
+     * ï¿½ï¿½ï¿½ï¿½Í£ï¿½ï¿½ï¿½Õ¼ä²¢ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¼ï¿½ï¿½ï¿½ï¿½Ä¿ï¿½ï¿½Í¼
      */
 	void Manager::displayViews() {
-        // ÉèÖÃÍ£¿¿¿Õ¼ä±êÖ¾
+        // ï¿½ï¿½ï¿½ï¿½Í£ï¿½ï¿½ï¿½Õ¼ï¿½ï¿½Ö¾
         ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
         ImGui::DockSpaceOverViewport(nullptr, dockspace_flags);
 
-        // ÉèÖÃÖ÷ÌâÑÕÉ«
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É«
         ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0.5f, 0.5f, 0.5f, 1.0f));
         ImGui::PushStyleColor(ImGuiCol_BorderShadow, ImVec4(0.5f, 0.5f, 0.5f, 1.0f));
         ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
         ImGui::PushStyleColor(ImGuiCol_TitleBg, ImVec4(0.2f, 0.2f, 0.2f, 1.0f));
         ImGui::PushStyleColor(ImGuiCol_TitleBgActive, ImVec4(0.3f, 0.3f, 0.3f, 1.0f));
 
-        // ÏÔÊ¾ËùÓÐÊÓÍ¼
+        // ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¼
         sceneView->display();
         inspectorView->display();
         projectView->display();
 	}
 
     /**
-     * ÏÔÊ¾¹¤¾ßÀ¸
-     * TODO: ÊµÏÖ¹¤¾ßÀ¸¹¦ÄÜ
+     * ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+     * TODO: Êµï¿½Ö¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
      */
     void Manager::displayToolBar() {
-        // TODO: ÊµÏÖ¹¤¾ßÀ¸
+        // TODO: Êµï¿½Ö¹ï¿½ï¿½ï¿½ï¿½ï¿½
     }
 }
