@@ -138,9 +138,8 @@ namespace FluidSimulation
         // 半拉格朗日追踪：回溯粒子/标量到上一步位置
         glm::vec2 PICGrid2d::semiLagrangian(const glm::vec2 &pt, double dt)
         {
-            // 一阶半拉格朗日公式：x_(n-1) = x_n - Δt · u(x_n)
-            glm::vec2 vel = getVelocity(pt);          // u(x_n)
-            glm::vec2 pos = pt - vel * (float)dt;     // 回溯到 x_(n-1)
+            glm::vec2 vel = getVelocity(pt); // 当前速度
+            glm::vec2 pos = pt - vel * (float)dt; // 回溯
             // 限制在域内
             pos[0] = max(0.0, min((dim[0] - 1) * cellSize, pos[0]));
             pos[1] = max(0.0, min((dim[1] - 1) * cellSize, pos[1]));
@@ -166,8 +165,7 @@ namespace FluidSimulation
             double tmin = -1e18, tmax = 1e18;
             double minv = -0.5 * cellSize;
             double maxv = 0.5 * cellSize;
-            // 2D AABB 相交检测：逐轴裁剪 t 区间
-            for (int k = 0; k < 2; k++)
+            for (int k = 0; k < 3; k++)
             {
                 double e = rayStart[k];
                 double f = rayDir[k];

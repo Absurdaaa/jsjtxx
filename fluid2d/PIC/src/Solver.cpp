@@ -136,12 +136,10 @@ namespace FluidSimulation
             continue;
           }
 
-          // glm::vec2 pos((i + 0.5f) * mGrid.cellSize, j * mGrid.cellSize);
-          // double buoyAccel = mGrid.getBoussinesqForce(pos) * invRho;
+          glm::vec2 pos((i + 0.5f) * mGrid.cellSize, j * mGrid.cellSize);
+          double buoyAccel = mGrid.getBoussinesqForce(pos) * invRho;
 
-          // mGrid.mV(i, j) += dt * (gy + buoyAccel);
-          
-          mGrid.mV(i, j) += dt * gy;
+          mGrid.mV(i, j) += dt * (gy + buoyAccel);
         }
     }
 
@@ -257,16 +255,11 @@ namespace FluidSimulation
 
       for (auto &p : mPs.particles)
       {
-        // PIC 部分
         glm::vec2 v_pic = mGrid.getVelocity(p.position);
-        // FLIP 部分
         glm::vec2 v_oldg = mGrid.getVelocityFromGrid(p.position, mU_prev, mV_prev);
-        // 混合
         glm::vec2 v_flip = p.velocity + (v_pic - v_oldg);
 
         p.velocity = (1.0f - flipAlpha) * v_pic + flipAlpha * v_flip;
-        std::cout << "PIC Vel: (" << v_pic.x << ", " << v_pic.y << "), FLIP Vel: (" << v_flip.x << ", " << v_flip.y << ")\n";
-        std::cout << "New Particle Vel: (" << p.velocity.x << ", " << p.velocity.y << ")\n";
       }
     }
 
