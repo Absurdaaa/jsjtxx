@@ -135,6 +135,16 @@ namespace PIC2dPara
 }
 
 /**
+ * 3D PIC 混合方法参数命名空间
+ */
+namespace PIC3dPara
+{
+    extern int particlesPerStep;
+    extern float emissionJitter;
+    extern float wallRestitution;
+}
+
+/**
  * 2D�������շ������������ռ�
  * ����2D�����������������������ò���
  */

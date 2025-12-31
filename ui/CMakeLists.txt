@@ -17,5 +17,6 @@ target_link_libraries(ui eulerian2d)
 target_link_libraries(ui pic2d)
 target_link_libraries(ui lagrangian3d)
 target_link_libraries(ui eulerian3d)
+target_link_libraries(ui pic3d)
 
 target_link_libraries(ui "${PROJECT_SOURCE_DIR}/third_party/glfw/lib/glfw3.lib")

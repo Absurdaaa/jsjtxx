@@ -21,6 +21,7 @@ include_directories(
 	"./fluid3d/"
 	"./fluid3d/Lagrangian/include"
 	"./fluid3d/Eulerian/include"
+	"./fluid3d/PIC/include"
 	"./ui/include"
 	"."
 )
@@ -41,6 +42,7 @@ add_subdirectory("./fluid2d/Eulerian")
 # 3d simulation scheme
 add_subdirectory("./fluid3d/Lagrangian")
 add_subdirectory("./fluid3d/Eulerian")
+add_subdirectory("./fluid3d/PIC")
 
 # ui
 add_subdirectory("./ui")

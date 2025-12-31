@@ -29,6 +29,7 @@ namespace FluidSimulation
         methodComponents.push_back(new PIC2d::PICComponent("PIC 2d", id++));
         methodComponents.push_back(new Lagrangian3d::Lagrangian3dComponent("Lagrangian 3d", id++));
         methodComponents.push_back(new Eulerian3d::Eulerian3dComponent("Eulerian 3d", id++));
+        methodComponents.push_back(new PIC3d::PIC3dComponent("PIC 3d", id++));
         // TODO(optional): ���Ӹ���ģ�ⷽ��
     }
 

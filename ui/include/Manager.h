@@ -24,6 +24,7 @@
 #include "PICComponent.h"
 #include "Lagrangian3dComponent.h"
 #include "Eulerian3dComponent.h"
+#include "PIC3dComponent.h"
 
 #include <vector>
 
