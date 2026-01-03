@@ -476,8 +476,48 @@ namespace FluidSimulation
 				break;
 
 			case 6:
-				// TODO(optional)
-				// add other method's parameters
+				// PIC 3d
+				ImGui::Text("PIC 3d:");
+				ImGui::SliderFloat("Delta Time", &Eulerian3dPara::dt, 0.0001f, 0.1f, "%.5f");
+				ImGui::InputInt("Particles / Source / Step", &PIC3dPara::particlesPerStep);
+				ImGui::SliderFloat("Emission Jitter (cell)", &PIC3dPara::emissionJitter, 0.0f, 1.0f);
+				ImGui::SliderFloat("Wall Restitution", &PIC3dPara::wallRestitution, 0.0f, 1.0f);
+				ImGui::Separator();
+				ImGui::Text("MAC grid:");
+				ImGui::PushItemWidth(150);
+				ImGui::InputScalar("Dim.x", ImGuiDataType_S32, &Eulerian3dPara::theDim3d[0], &intStep, NULL);
+				ImGui::InputScalar("Dim.y", ImGuiDataType_S32, &Eulerian3dPara::theDim3d[1], &intStep, NULL);
+				ImGui::InputScalar("Dim.z", ImGuiDataType_S32, &Eulerian3dPara::theDim3d[2], &intStep, NULL);
+				ImGui::PopItemWidth();
+
+				ImGui::InputFloat("Cell Size", &Eulerian3dPara::theCellSize3d, 0.01f, 0.1f, "%.3f");
+				ImGui::Checkbox("Add Solid", &Eulerian3dPara::addSolid);
+				ImGui::Separator();
+
+				ImGui::Text("Sources:");
+				for (int i = 0; i < Eulerian3dPara::source.size(); i++) {
+					ImGui::Text(("source grid " + std::to_string(i)).c_str());
+					ImGui::PushID(i);
+					ImGui::SameLine();
+					if (ImGui::Button("delete")) {
+						Eulerian3dPara::source.erase(Eulerian3dPara::source.begin() + i);
+						i--;
+					}
+					else {
+						ImGui::InputInt3("position(x,y,z)", &Eulerian3dPara::source[i].position.x);
+						ImGui::InputFloat3("velocity(x,y,z)", &Eulerian3dPara::source[i].velocity.x);
+						ImGui::InputScalar("density", ImGuiDataType_Float, &Eulerian3dPara::source[i].density, &floatStep1, NULL);
+						ImGui::InputScalar("temperature", ImGuiDataType_Float, &Eulerian3dPara::source[i].temp, &floatStep1, NULL);
+					}
+					ImGui::PopID();
+					ImGui::Text("---------------------------------");
+				}
+
+				if (ImGui::Button("add source grid")) {
+					Eulerian3dPara::source.push_back(Eulerian3dPara::SourceSmoke({}));
+				}
+
+				ImGui::Text("note: Please rerun after setting");
 
 				break;
 			}
