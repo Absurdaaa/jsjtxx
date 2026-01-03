@@ -4,6 +4,7 @@
  */
 
 #include "PIC/include/Renderer3d.h"
+#include "PIC/include/ParticleSplat.h"
 
 namespace FluidSimulation
 {
@@ -25,8 +26,8 @@ namespace FluidSimulation
 
             // 创建着色器
             shader = new Glb::Shader();
-            std::string vertPath = shaderPath + "/DrawParticles3d.vert";
-            std::string fragPath = shaderPath + "/DrawParticles3d.frag";
+            std::string vertPath = shaderPath + "/DrawPICParticles3d.vert";
+            std::string fragPath = shaderPath + "/DrawPICParticles3d.frag";
             shader->buildFromFile(vertPath, fragPath);
 
             // 创建帧缓冲对象
@@ -89,6 +90,31 @@ namespace FluidSimulation
          */
         void Renderer3d::draw(ParticleSystem3d &ps)
         {
+            if (useCPURender) {
+                // build simple particle list (assign uniform density)
+                std::vector<PIC3d::ParticleSimple> list;
+                list.reserve(ps.particles.size());
+                for (const auto &p : ps.particles) {
+                    PIC3d::ParticleSimple s;
+                    s.position = p.position;
+                    s.density = 1.0f; // default density; could be improved by sampling grid
+                    list.push_back(s);
+                }
+
+                PIC3d::ImageRGBA img;
+                float sigma = 4.0f;
+                float extinction = 1.5f;
+                glm::vec3 smokeColor(0.4f, 0.4f, 0.45f);
+                glm::vec3 bgColor(0.1f, 0.1f, 0.1f);
+                PIC3d::renderParticlesSplatCPU(list, Glb::Camera::getInstance().GetView(), Glb::Camera::getInstance().GetProjection(), imageWidth, imageHeight, sigma, extinction, smokeColor, bgColor, img);
+                // optional: could upload img to GL texture here if needed
+                
+                
+                // 绘制容器边框
+                container->draw();
+
+                return;
+            }
             // 上传粒子数据到 GPU
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, VBO);
             glBufferData(GL_SHADER_STORAGE_BUFFER, ps.particles.size() * sizeof(Particle), ps.particles.data(), GL_DYNAMIC_COPY);

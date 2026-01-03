@@ -15,7 +15,7 @@ namespace FluidSimulation
 
     void Solver::solve()
     {
-      const double dt = Eulerian2dPara::dt;
+      const double dt = PIC2dPara::dt;
 
       // 1. 发射新粒子
       mPs.emitFromSources();
@@ -134,7 +134,7 @@ namespace FluidSimulation
       const float h = mGrid.cellSize;
 
       Glb::CubicGridData2d newT, newD;
-      newT.initialize(Eulerian2dPara::ambientTemp);
+      newT.initialize(PIC2dPara::ambientTemp);
       newD.initialize(0.0);
 
       for (int j = 0; j < ny; ++j)
@@ -172,15 +172,16 @@ namespace FluidSimulation
       const float h = mGrid.cellSize;
 
       // 只添加浮力（烟雾模拟）
-      for (int j = 1; j < ny; ++j)  // 跳过边界
-      {
-        for (int i = 0; i < nx; ++i)
-        {
-          glm::vec2 pos((i + 0.5f) * h, j * h);
-          double buoy = mGrid.getBoussinesqForce(pos);
-          mGrid.mV(i, j) += dt * buoy;
-        }
-      }
+      // for (int j = 1; j < ny; ++j)  // 跳过边界
+      // {
+      //   for (int i = 0; i < nx; ++i)
+      //   {
+      //     glm::vec2 pos((i + 0.5f) * h, j * h);
+      //     double buoy = mGrid.getBoussinesqForce(pos);
+      //     mGrid.mV(i, j) += dt * buoy;
+      //   }
+      // }
+      
 
       // 边界速度设为0
       for (int i = 0; i < nx; ++i)
@@ -201,7 +202,7 @@ namespace FluidSimulation
       const int nx = mGrid.dim[PICGrid2d::X];
       const int ny = mGrid.dim[PICGrid2d::Y];
       const float h = mGrid.cellSize;
-      const float scale = dt / (Eulerian2dPara::airDensity * h * h);
+      const float scale = dt / (PIC2dPara::airDensity * h * h);
 
       // 先将固体边界的法向速度设为0
       for (int j = 0; j < ny; ++j)
@@ -321,7 +322,10 @@ namespace FluidSimulation
       const float restitution = PIC2dPara::wallRestitution; // 反弹系数
       const float friction = 0.9f; // 切向摩擦保留
 
-      for (auto &p : mPs.particles)
+        std::vector<Particle> survivors;
+        survivors.reserve(mPs.particles.size());
+
+        for (auto &p : mPs.particles)
       {
         // 计算需要的子步数：确保每步移动不超过半个格子
         float dist = glm::length(p.velocity) * (float)dt;
@@ -339,7 +343,11 @@ namespace FluidSimulation
 
           // 域边界碰撞（带反弹）
           if (p.position.x < minX) { p.position.x = minX; p.velocity.x *= -restitution; }
-          if (p.position.x > maxX) { p.position.x = maxX; p.velocity.x *= -restitution; }
+            if (p.position.x > maxX) { 
+              // 标记为到达出口，放在域外以便后续删除
+              p.position.x = maxX; 
+              p.velocity.x = 0.0f; 
+            }
           if (p.position.y < minY) { p.position.y = minY; p.velocity.y *= -restitution; }
           if (p.position.y > maxY) { p.position.y = maxY; p.velocity.y *= -restitution; }
 
@@ -365,7 +373,20 @@ namespace FluidSimulation
             p.position = oldPos;
           }
         }
+        
+          // 如果粒子到达右边界（出口），则不加入 survivors，表示消失
+          if (p.position.x >= maxX - 1e-6f)
+          {
+            // skip (particle disappears)
+            continue;
+          }
+
+          survivors.push_back(p);
       }
-    }
+
+        // 替换粒子列表为幸存者
+        mPs.particles.swap(survivors);
+
+      }
   } // namespace PIC2d
 } // namespace FluidSimulation

@@ -20,23 +20,47 @@ namespace FluidSimulation
             static std::mt19937 rng(42);
             std::uniform_real_distribution<float> uni(-0.5f, 0.5f);
 
-            const float h = Eulerian3dPara::theCellSize3d;        // 网格单元大小
+            const float h = PIC3dPara::theCellSize3d;        // 网格单元大小
             const int emitN = PIC3dPara::particlesPerStep;        // 每步发射粒子数
             const float jitter = PIC3dPara::emissionJitter * h;   // 发射抖动范围
+            const int radius = PIC3dPara::emitterRadius;         // 发射源半径（格子数）
+            std::uniform_int_distribution<int> idist(radius > 0 ? -radius : 0, radius > 0 ? radius : 0);
 
             // 遍历所有烟雾源
-            for (const auto &src : Eulerian3dPara::source)
+            for (const auto &src : PIC3dPara::source)
             {
-                // 计算源的世界坐标（单元中心）
-                float baseX = (src.position.x + 0.5f) * h;
-                float baseY = (src.position.y + 0.5f) * h;
-                float baseZ = (src.position.z + 0.5f) * h;
-
-                // 发射指定数量的粒子
+                // 发射指定数量的粒子，发射源可为球体（以格子为单位的半径）
                 for (int n = 0; n < emitN; ++n)
                 {
+                    int dx = idist(rng);
+                    int dy = idist(rng);
+                    int dz = idist(rng);
+
+                    // 若使用球形发射区，需要满足 dx^2+dy^2+dz^2 <= radius^2
+                    if (radius > 0 && (dx * dx + dy * dy + dz * dz > radius * radius))
+                    {
+                        // 若不满足，重试一次（简单策略），否则退回到中心
+                        dx = 0; dy = 0; dz = 0;
+                    }
+
+                    int cellX = src.position.x + dx;
+                    int cellY = src.position.y + dy;
+                    int cellZ = src.position.z + dz;
+
+                    // clamp 到网格范围
+                    cellX = cellX < PIC3dPara::theDim3d[0] ? cellX : PIC3dPara::theDim3d[0] - 1;
+                    cellX = cellX > 0 ? cellX : 0;
+                    cellY = cellY < PIC3dPara::theDim3d[1] ? cellY : PIC3dPara::theDim3d[1] - 1;
+                    cellY = cellY > 0 ? cellY : 0;
+                    cellZ = cellZ < PIC3dPara::theDim3d[2] ? cellZ : PIC3dPara::theDim3d[2] - 1;
+                    cellZ = cellZ > 0 ? cellZ : 0;
+
+                    float baseX = (cellX + 0.5f) * h;
+                    float baseY = (cellY + 0.5f) * h;
+                    float baseZ = (cellZ + 0.5f) * h;
+
                     Particle p;
-                    // 在源位置周围随机抖动
+                    // 在单元内 jitter
                     p.position.x = baseX + uni(rng) * jitter;
                     p.position.y = baseY + uni(rng) * jitter;
                     p.position.z = baseZ + uni(rng) * jitter;

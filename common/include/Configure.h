@@ -129,9 +129,35 @@ namespace Eulerian3dPara
  */
 namespace PIC2dPara
 {
-    extern int particlesPerStep;   // 每个源每步发射粒子数
-    extern float emissionJitter;   // 发射抖动系数（以cell size为单位）
-    extern float wallRestitution;  // 边界弹性系数
+  struct SourceSmoke
+  {
+    glm::ivec2 position = glm::ivec2(0);
+    glm::vec2 velocity = glm::vec2(0.0f);
+    float density = 0.0f;
+    float temp = 0.0f;
+  };
+
+  extern int theDim2d[];
+  extern std::vector<SourceSmoke> source;
+  extern float theCellSize2d;
+  extern bool addSolid;
+
+  extern float dt;
+
+  extern float contrast;
+  extern int drawModel;
+  extern int gridNum;
+
+  extern float airDensity;
+  extern float ambientTemp;
+  extern float boussinesqAlpha;
+  extern float boussinesqBeta;
+  extern float vorticityConst;
+
+  extern int particlesPerStep;  // 每个源每步发射粒子数
+  extern float emissionJitter;  // 发射抖动系数（以cell size为单位）
+  extern float wallRestitution; // 边界弹性系数
+    extern int emitterRadius;     // 发射源半径（以格子为单位），0 表示单格
 }
 
 /**
@@ -139,9 +165,48 @@ namespace PIC2dPara
  */
 namespace PIC3dPara
 {
-    extern int particlesPerStep;
-    extern float emissionJitter;
-    extern float wallRestitution;
+  struct SourceSmoke
+  {
+    glm::ivec3 position = glm::ivec3(0);
+    glm::vec3 velocity = glm::vec3(0.0f);
+    float density = 0.0f;
+    float temp = 0.0f;
+  };
+
+  extern int theDim3d[];
+  extern float theCellSize3d;
+  extern std::vector<SourceSmoke> source;
+  extern bool addSolid;
+
+  extern float contrast;
+  extern bool oneSheet;
+  extern float distanceX;
+  extern float distanceY;
+  extern float distanceZ;
+  extern bool xySheetsON;
+  extern bool yzSheetsON;
+  extern bool xzSheetsON;
+  extern int xySheetsNum;
+  extern int yzSheetsNum;
+  extern int xzSheetsNum;
+  extern int drawModel;
+  extern int gridNumX;
+  extern int gridNumY;
+  extern int gridNumZ;
+
+  extern float dt;
+
+  extern float airDensity;
+  extern float ambientTemp;
+  extern float boussinesqAlpha;
+  extern float boussinesqBeta;
+  extern float vorticityConst;
+
+  extern int particlesPerStep;
+  extern float emissionJitter;
+  extern float wallRestitution;
+    extern int emitterRadius; // 发射源半径（以格子为单位），0 表示单格
+    extern bool useCPURender; // 是否使用 CPU 渲染而非 OpenGL
 }
 
 /**

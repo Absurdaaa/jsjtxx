@@ -277,6 +277,7 @@ namespace FluidSimulation
 				ImGui::SliderFloat("Delta Time", &Eulerian2dPara::dt, 0.0001f, 0.05f, "%.5f");
 				ImGui::InputInt("Particles / Source / Step", &PIC2dPara::particlesPerStep);
 				ImGui::SliderFloat("Emission Jitter (cell)", &PIC2dPara::emissionJitter, 0.0f, 1.0f);
+				ImGui::InputInt("Emitter Radius (cells)", &PIC2dPara::emitterRadius);
 				ImGui::SliderFloat("Wall Restitution", &PIC2dPara::wallRestitution, 0.0f, 1.0f);
 				ImGui::Separator();
 				ImGui::Text("MAC grid:");
@@ -481,6 +482,7 @@ namespace FluidSimulation
 				ImGui::SliderFloat("Delta Time", &Eulerian3dPara::dt, 0.0001f, 0.1f, "%.5f");
 				ImGui::InputInt("Particles / Source / Step", &PIC3dPara::particlesPerStep);
 				ImGui::SliderFloat("Emission Jitter (cell)", &PIC3dPara::emissionJitter, 0.0f, 1.0f);
+				ImGui::InputInt("Emitter Radius (cells)", &PIC3dPara::emitterRadius);
 				ImGui::SliderFloat("Wall Restitution", &PIC3dPara::wallRestitution, 0.0f, 1.0f);
 				ImGui::Separator();
 				ImGui::Text("MAC grid:");

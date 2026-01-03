@@ -30,6 +30,8 @@ namespace FluidSimulation
         public:
             Renderer3d() {}
 
+            void setUseCPURender(bool v) { useCPURender = v; }
+
             /**
              * 初始化渲染器
              * 创建着色器、帧缓冲、顶点数组等 OpenGL 资源
@@ -63,6 +65,7 @@ namespace FluidSimulation
             GLuint textureID = 0;  // 渲染目标纹理
 
             int32_t particleNum = 0;  // 粒子数量
+            bool useCPURender = false;
         };
     }
 }

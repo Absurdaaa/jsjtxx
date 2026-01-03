@@ -6,6 +6,7 @@
 #include "PIC3dComponent.h"
 #include "Logger.h"
 #include "Global.h"
+#include "Camera.h"
 
 namespace FluidSimulation
 {
@@ -54,7 +55,10 @@ namespace FluidSimulation
             // 创建渲染器和求解器
             renderer = new Renderer3d();
             renderer->init();
+            // 使用配置决定是否启用 CPU 渲染
+            renderer->setUseCPURender(PIC3dPara::useCPURender);
             solver = new Solver3d(*particleSystem, *grid);
+
         }
 
         /**

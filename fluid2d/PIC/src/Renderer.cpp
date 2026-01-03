@@ -19,8 +19,8 @@ namespace FluidSimulation
               textureID(0), RBO(0), densityTexture(0)
         {
             // 使用网格分辨率作为密度场分辨率
-            gridResX = Eulerian2dPara::theDim2d[0];
-            gridResY = Eulerian2dPara::theDim2d[1];
+            gridResX = PIC2dPara::theDim2d[0];
+            gridResY = PIC2dPara::theDim2d[1];
             densityData.resize(gridResX * gridResY, 0.0f);
 
             initGLResources();
@@ -42,7 +42,7 @@ namespace FluidSimulation
          */
         void Renderer::updateDensityTexture(const ParticleSystem &ps)
         {
-            const float h = Eulerian2dPara::theCellSize2d;
+            const float h = PIC2dPara::theCellSize2d;
             const float invH = 1.0f / h;
 
             // 清空密度场
@@ -114,7 +114,7 @@ namespace FluidSimulation
 
             // 使用烟雾着色器
             smokeShader->use();
-            smokeShader->setFloat("contrast", Eulerian2dPara::contrast);
+            smokeShader->setFloat("contrast", PIC2dPara::contrast);
 
             // 绑定密度纹理
             glActiveTexture(GL_TEXTURE0);

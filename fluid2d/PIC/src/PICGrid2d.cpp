@@ -10,9 +10,9 @@ namespace FluidSimulation
         // 构造函数：根据全局参数初始化网格尺寸和单元大小，并初始化所有网格数据
         PICGrid2d::PICGrid2d()
         {
-            cellSize = Eulerian2dPara::theCellSize2d; // 单元大小
-            dim[0] = Eulerian2dPara::theDim2d[0];     // x方向格点数
-            dim[1] = Eulerian2dPara::theDim2d[1];     // y方向格点数
+            cellSize = PIC2dPara::theCellSize2d; // 单元大小
+            dim[0] = PIC2dPara::theDim2d[0];     // x方向格点数
+            dim[1] = PIC2dPara::theDim2d[1];     // y方向格点数
             initialize(); // 初始化所有网格数据
         }
 
@@ -54,32 +54,45 @@ namespace FluidSimulation
             mU.initialize(0.0); // X方向速度清零
             mV.initialize(0.0); // Y方向速度清零
             mD.initialize(0.0); // 密度清零
-            mT.initialize(Eulerian2dPara::ambientTemp); // 温度设为环境温度
+            mT.initialize(PIC2dPara::ambientTemp); // 温度设为环境温度
         }
 
         // 创建固体障碍物（如中间一条横线）
         void PICGrid2d::createSolids()
         {
             mSolid.initialize(); // 全部初始化为流体
-            if (Eulerian2dPara::addSolid)
+            if (PIC2dPara::addSolid)
             {
-                int j = dim[1] / 2;
-                for (int i = dim[0] / 4; i < dim[0] * 3 / 4; i++)
-                    mSolid(i, j) = 1; // 设置为固体
+                // 将固体设置为一个圆形障碍，位于域中心稍偏上的位置（空中球体效果）
+                int cx = dim[0] / 2; // 圆心（格子索引）
+                int cy = dim[1] / 2; // 放在中间高度
+                // 半径按网格高度的一定比例，例如总高度的1/6
+                int radius = dim[1] / 10;
+                if (radius < 2) radius = 2;
+                for (int j = 0; j < dim[1]; ++j)
+                {
+                    for (int i = 0; i < dim[0]; ++i)
+                    {
+                        int dx = i - cx;
+                        int dy = j - cy;
+                        if (dx * dx + dy * dy <= radius * radius)
+                            mSolid(i, j) = 1; // 设置为固体
+                    }
+                }
             }
         }
 
         // 根据源参数更新温度/密度/速度
         void PICGrid2d::updateSources()
         {
-            for (int i = 0; i < Eulerian2dPara::source.size(); i++)
+            for (int i = 0; i < PIC2dPara::source.size(); i++)
             {
-                int x = Eulerian2dPara::source[i].position.x;
-                int y = Eulerian2dPara::source[i].position.y;
-                mT(x, y) = Eulerian2dPara::source[i].temp;         // 源温度
-                mD(x, y) = Eulerian2dPara::source[i].density;      // 源密度
-                mU(x, y) = Eulerian2dPara::source[i].velocity.x;   // 源X速度
-                mV(x, y) = Eulerian2dPara::source[i].velocity.y;   // 源Y速度
+                int x = PIC2dPara::source[i].position.x;
+                int y = PIC2dPara::source[i].position.y;
+                mT(x, y) = PIC2dPara::source[i].temp;         // 源温度
+                mD(x, y) = PIC2dPara::source[i].density;      // 源密度
+                mU(x, y) = PIC2dPara::source[i].velocity.x;   // 源X速度
+                mV(x, y) = PIC2dPara::source[i].velocity.y;   // 源Y速度
             }
         }
 
@@ -96,8 +109,8 @@ namespace FluidSimulation
         {
             double temperature = getTemperature(pos);
             double smokeDensity = getDensity(pos);
-            double yforce = -Eulerian2dPara::boussinesqAlpha * smokeDensity +
-                            Eulerian2dPara::boussinesqBeta * (temperature - Eulerian2dPara::ambientTemp);
+            double yforce = -PIC2dPara::boussinesqAlpha * smokeDensity +
+                            PIC2dPara::boussinesqBeta * (temperature - PIC2dPara::ambientTemp);
             return yforce;
         }
 

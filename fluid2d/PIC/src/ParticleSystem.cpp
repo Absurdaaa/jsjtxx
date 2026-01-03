@@ -10,18 +10,30 @@ namespace FluidSimulation
             static std::mt19937 rng(42);
             std::uniform_real_distribution<float> uni(-0.5f, 0.5f);
 
-            const float h = Eulerian2dPara::theCellSize2d;
+            const float h = PIC2dPara::theCellSize2d;
             const int emitN = PIC2dPara::particlesPerStep;
             const float jitter = PIC2dPara::emissionJitter * h;
+            const int radius = PIC2dPara::emitterRadius; // emitter radius in cells
+            std::uniform_int_distribution<int> idist(radius > 0 ? -radius : 0, radius > 0 ? radius : 0);
 
-            for (const auto &src : Eulerian2dPara::source)
+            for (const auto &src : PIC2dPara::source)
             {
-                // 源位置：网格坐标转世界坐标（单元中心）
-                float baseX = (src.position.x + 0.5f) * h;
-                float baseY = (src.position.y + 0.5f) * h;
-
+                // 发射位置：可以在源周围 radius 格子内随机分布，形成更粗的喷射
                 for (int n = 0; n < emitN; ++n)
                 {
+                    int dx = idist(rng);
+                    int dy = idist(rng);
+                    int cellX = src.position.x + dx;
+                    int cellY = src.position.y + dy;
+                    // clamp to grid
+                    cellX = cellX < PIC2dPara::theDim2d[0] ? cellX : PIC2dPara::theDim2d[0] - 1;
+                    cellX = cellX > 0 ? cellX : 0;
+                    cellY = cellY < PIC2dPara::theDim2d[1] ? cellY : PIC2dPara::theDim2d[1] - 1;
+                    cellY = cellY > 0 ? cellY : 0;
+
+                    float baseX = (cellX + 0.5f) * h;
+                    float baseY = (cellY + 0.5f) * h;
+
                     Particle p;
                     p.position.x = baseX + uni(rng) * jitter;
                     p.position.y = baseY + uni(rng) * jitter;

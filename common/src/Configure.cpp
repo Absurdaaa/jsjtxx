@@ -44,7 +44,8 @@ namespace Eulerian2dPara
 namespace Eulerian3dPara
 {
     // MAC�������
-    int theDim3d[3] = {12, 36, 36}; // ����ά��(ȷ�� x <= y = z)
+    // 默认使用正方体场景：x = y = z
+    int theDim3d[3] = {36, 36, 36}; // ����ά�� (正方体)
     float theCellSize3d = 0.5;      // ����Ԫ��С
     std::vector<SourceSmoke> source = {
         {glm::ivec3(theDim3d[0] / 2, theDim3d[1] / 2, 0), glm::vec3(0.0f, 0.0f, 1.0f), 1.0f, 1.0f}
@@ -79,17 +80,80 @@ namespace Eulerian3dPara
 // 2D PIC 混合方法参数
 namespace PIC2dPara
 {
-    int particlesPerStep = 5;
-    float emissionJitter = 0.3f;
-    float wallRestitution = 0.1f;
+  // yuanben
+  // MAC�������
+  int theDim2d[2] = {100, 100}; // ����ά��
+  float theCellSize2d = 0.5;    // ����Ԫ��С
+
+  // ����Դ�����ò���
+  // 默认场景：左侧中间喷出，向右流动，以便绕过中间空中障碍
+  std::vector<SourceSmoke> source = {
+      {// 源位置                      // ��ʼ�ٶ�           // �ܶ�  // �¶�
+       glm::ivec2(0, theDim2d[1] / 2), 
+       glm::vec2(500.0f, 0.0f), 
+       1.0f, 
+       1.0f}
+       };
+
+  bool addSolid = true; // �Ƿ����ӹ���߽�
+
+  // ��Ⱦ������
+  float contrast = 1;        // �Աȶ�
+  int drawModel = 0;         // ����ģʽ
+  int gridNum = theDim2d[0]; // ��������
+
+  // ���������
+  float dt = 0.01;               // ʱ�䲽��
+  float airDensity = 1.3;        // �����ܶ�
+  float ambientTemp = 0.0;       // �����¶�
+  float boussinesqAlpha = 500.0; // Boussinesq����ʽ�е�alpha����
+  float boussinesqBeta = 2500.0; // Boussinesq����ʽ�е�beta����
+
+  int particlesPerStep = 100;
+  float emissionJitter = 0.3f;
+  float wallRestitution = 0.1f;
+    int emitterRadius = 10; // 发射源半径（格子数），1 表示覆盖中心及邻格
 }
 
 // 3D PIC 混合方法参数
 namespace PIC3dPara
 {
-    int particlesPerStep = 5;
-    float emissionJitter = 0.3f;
-    float wallRestitution = 0.1f;
+    // 使用立方体场景，方便可视化与设置
+    int theDim3d[3] = {36, 36, 36}; // ����ά�� (正方体)
+  float theCellSize3d = 0.5;      // ����Ԫ��С
+  std::vector<SourceSmoke> source = {
+      {glm::ivec3(0, theDim3d[1] / 2, theDim3d[2] / 2), glm::vec3(100.0f, 0.0f, 0.0f), 1.0f, 1.0f}};
+  bool addSolid = true; // �Ƿ����ӹ���߽�
+
+  // ��Ⱦ������
+  float contrast = 1;                                           // �Աȶ�
+  bool oneSheet = true;                                         // �Ƿ�ֻ��ʾһ����Ƭ
+  float distanceX = 0.51;                                       // X����Ƭλ��
+  float distanceY = 0.51;                                       // Y����Ƭλ��
+  float distanceZ = 0.985;                                      // Z����Ƭλ��
+  bool xySheetsON = true;                                       // �Ƿ���ʾXYƽ����Ƭ
+  bool yzSheetsON = true;                                       // �Ƿ���ʾYZƽ����Ƭ
+  bool xzSheetsON = true;                                       // �Ƿ���ʾXZƽ����Ƭ
+  int drawModel = 0;                                            // ����ģʽ
+  int gridNumX = (int)((float)theDim3d[0] / theDim3d[2] * 100); // X��������
+  int gridNumY = (int)((float)theDim3d[1] / theDim3d[2] * 100); // Y��������
+  int gridNumZ = 100;                                           // Z��������
+  int xySheetsNum = 3;                                          // XYƽ����Ƭ����
+  int yzSheetsNum = 3;                                          // YZƽ����Ƭ����
+  int xzSheetsNum = 3;                                          // XZƽ����Ƭ����
+
+  // ���������
+  float dt = 0.01;               // ʱ�䲽��
+  float airDensity = 1.3;        // �����ܶ�
+  float ambientTemp = 0.0;       // �����¶�
+  float boussinesqAlpha = 500.0; // Boussinesq����ʽ�е�alpha����
+  float boussinesqBeta = 2500.0; // Boussinesq����ʽ�е�beta����
+
+  int particlesPerStep = 100;
+  float emissionJitter = 0.3f;
+  float wallRestitution = 0.1f;
+  int emitterRadius = 5;
+    bool useCPURender = false;
 }
 
 // 2D�������շ�����ز���
