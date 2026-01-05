@@ -13,6 +13,9 @@ namespace FluidSimulation
         /**
          * 从烟雾源发射新粒子
          * 在每个源位置周围随机抖动生成粒子
+         * 相关成员：
+         * - Particle::position / Particle::velocity: 新粒子的属性
+         * - ParticleSystem3d::particles: 将新粒子 push_back 到该容器
          */
         void ParticleSystem3d::emitFromSources()
         {

@@ -12,6 +12,10 @@ namespace FluidSimulation
     {
         /**
          * 构造函数：初始化求解器
+         * 成员变量（在 Solver3d 类中）：
+         * - mPs: 对 ParticleSystem3d 的引用，用于访问粒子
+         * - mGrid: 对 PICGrid3d 的引用，用于访问和修改网格数据
+         * - mU_prev/mV_prev/mW_prev: 保存上一帧网格速度以支持 FLIP 更新
          */
         Solver3d::Solver3d(ParticleSystem3d &ps, PICGrid3d &grid)
             : mPs(ps), mGrid(grid)

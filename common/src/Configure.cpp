@@ -153,7 +153,6 @@ namespace PIC3dPara
   float emissionJitter = 0.3f;
   float wallRestitution = 0.1f;
   int emitterRadius = 5;
-    bool useCPURender = false;
 }
 
 // 2D�������շ�����ز���

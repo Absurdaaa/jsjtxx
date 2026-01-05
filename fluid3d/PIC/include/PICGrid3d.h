@@ -17,6 +17,11 @@ namespace FluidSimulation
         /**
          * 3D PIC 网格类
          * 继承自 MACGrid3d，复用其速度场、温度场、密度场等数据结构
+         * 该类主要复用父类的成员变量（在 MACGrid3d 中定义），例如：
+         * - mU/mV/mW: 网格在三个叉格面上的速度分量
+         * - mT/mD: 温度和密度的标量场
+         * - dim: 网格尺寸 (x,y,z)
+         * - cellSize: 网格单元大小
          */
         class PICGrid3d : public Eulerian3d::MACGrid3d
         {

@@ -14,6 +14,11 @@ namespace FluidSimulation
     {
         /**
          * 关闭组件，释放所有资源
+         * 成员说明（在 PIC3dComponent 中）：
+         * - renderer: 指向 Renderer3d 的指针，负责渲染
+         * - solver: 指向 Solver3d 的指针，负责仿真步骤
+         * - grid: 指向 PICGrid3d 的指针，表示计算网格
+         * - particleSystem: 指向 ParticleSystem3d 的指针，保存粒子数据
          */
         void PIC3dComponent::shutDown()
         {
@@ -55,8 +60,6 @@ namespace FluidSimulation
             // 创建渲染器和求解器
             renderer = new Renderer3d();
             renderer->init();
-            // 使用配置决定是否启用 CPU 渲染
-            renderer->setUseCPURender(PIC3dPara::useCPURender);
             solver = new Solver3d(*particleSystem, *grid);
 
         }

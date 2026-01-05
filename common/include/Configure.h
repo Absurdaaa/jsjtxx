@@ -206,7 +206,6 @@ namespace PIC3dPara
   extern float emissionJitter;
   extern float wallRestitution;
     extern int emitterRadius; // 发射源半径（以格子为单位），0 表示单格
-    extern bool useCPURender; // 是否使用 CPU 渲染而非 OpenGL
 }
 
 /**

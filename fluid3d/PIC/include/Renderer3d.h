@@ -30,8 +30,6 @@ namespace FluidSimulation
         public:
             Renderer3d() {}
 
-            void setUseCPURender(bool v) { useCPURender = v; }
-
             /**
              * 初始化渲染器
              * 创建着色器、帧缓冲、顶点数组等 OpenGL 资源
@@ -55,17 +53,16 @@ namespace FluidSimulation
              */
             void MakeVertexArrays();
 
-            Glb::Shader *shader = nullptr;      // 着色器
-            Glb::Container *container = nullptr; // 容器边框
+            Glb::Shader *shader = nullptr;      // 着色器：用于渲染粒子（顶点/片段着色器）
+            Glb::Container *container = nullptr; // 容器边框：可视化仿真域边界
 
-            GLuint FBO = 0;        // 帧缓冲对象
-            GLuint RBO = 0;        // 渲染缓冲对象
-            GLuint VAO = 0;        // 顶点数组对象
-            GLuint VBO = 0;        // 顶点缓冲对象
-            GLuint textureID = 0;  // 渲染目标纹理
+            GLuint FBO = 0;        // 帧缓冲对象：渲染目标的 FBO
+            GLuint RBO = 0;        // 渲染缓冲对象：深度/模板缓冲
+            GLuint VAO = 0;        // 顶点数组对象：描述顶点属性布局
+            GLuint VBO = 0;        // 顶点缓冲对象：存放粒子数据的 GPU 缓冲
+            GLuint textureID = 0;  // 渲染目标纹理：最终渲染输出的贴图 ID
 
-            int32_t particleNum = 0;  // 粒子数量
-            bool useCPURender = false;
+            int32_t particleNum = 0;  // 粒子数量：当前上传到 GPU 的粒子数
         };
     }
 }

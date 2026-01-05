@@ -36,11 +36,11 @@ namespace FluidSimulation
             void solve();
 
         private:
-            ParticleSystem3d &mPs;   // 粒子系统引用
-            PICGrid3d &mGrid;        // 网格引用
+            ParticleSystem3d &mPs;   // 粒子系统引用：操作与查询粒子数据
+            PICGrid3d &mGrid;        // 网格引用：访问/修改网格速度、密度、温度等字段
 
-            // 保存上一步的速度场，用于 FLIP 计算
-            Glb::GridData3dX mU_prev;  // 上一步 X 方向速度
+            // 保存上一步的速度场，用于 FLIP 计算（计算网格速度变化量）
+            Glb::GridData3dX mU_prev;  // 上一步 X 方向速度（用于 FLIP 差值）
             Glb::GridData3dY mV_prev;  // 上一步 Y 方向速度
             Glb::GridData3dZ mW_prev;  // 上一步 Z 方向速度
 

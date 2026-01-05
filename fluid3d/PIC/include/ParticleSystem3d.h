@@ -18,6 +18,9 @@ namespace FluidSimulation
         /**
          * 粒子结构体
          * 存储粒子的位置和速度
+         * 成员变量：
+         * - position: 粒子在世界空间中的位置 (x,y,z)
+         * - velocity: 粒子的速度向量 (x,y,z)
          */
         struct Particle
         {
@@ -32,7 +35,7 @@ namespace FluidSimulation
         class ParticleSystem3d
         {
         public:
-            std::vector<Particle> particles;  // 粒子容器
+            std::vector<Particle> particles;  // 粒子容器：保存当前活跃的粒子列表
 
             /**
              * 从烟雾源发射新粒子
