@@ -127,3 +127,78 @@ $$
 - `ui/src/InspectorView.cpp`
   - PIC 3d 面板新增 `Pressure Iters`
   - PIC 3d 面板 `Delta Time` 绑定修正为 `PIC3dPara::dt`
+
+---
+
+## 8) 场景：中心球 + X+ 出流 + 面上圆形喷口
+
+本次把 3D PIC 场景整理为与 2D 类似的结构：
+
+- **中心球体障碍**：用 SDF（signed distance field）生成 solid cell；并用 *face-center* SDF 判定 solid face，让球边界更圆。
+- **X+ 出流（outflow）**：右侧 $+X$ 边界不当作固体面（不做 no-penetration），允许物质/粒子从右侧离开。
+- **面上圆形喷口**：从“体积发射”改为“在固定 $x$ 层的一张薄片上、$y$-$z$ 平面内的圆盘区域采样”。
+
+对应文件：
+
+- `fluid3d/PIC/include/PICGrid3d.h`
+- `fluid3d/PIC/src/PICGrid3d.cpp`
+- `fluid3d/PIC/src/Solver3d.cpp`
+- `fluid3d/PIC/src/ParticleSystem3d.cpp`
+
+### 8.1 球半径参数（cell 单位）
+
+新增参数：`PIC3dPara::sphereRadiusCells`（单位：cell）。
+
+- 默认值：`6.5f`
+- 使用位置：`PICGrid3d::initialize()` 会把该值转换为世界单位半径并 clamp 到合理范围。
+- 注意：半径在网格初始化时决定（固体体素/solid face 也依赖它），因此 **修改后通常需要 rerun/restart 才能完全生效**。
+
+对应文件：
+
+- `common/include/Configure.h`
+- `common/src/Configure.cpp`
+- `fluid3d/PIC/src/PICGrid3d.cpp`
+
+### 8.2 X+ 出流
+
+- `PICGrid3d::isSolidFace(...)`：对 $+X$ 边界返回 `false`（表示该边界面不是 solid face）。
+- 粒子层面：advect 后越过右侧边界的粒子会被移除，避免在域外累积。
+
+### 8.3 面上圆形喷口（YZ 圆盘）
+
+喷口改为“面上圆盘”：
+
+- 固定在 `source` 的 $x$ 位置附近（极薄厚度）。
+- 在 $y$-$z$ 平面用拒绝采样（rejection sampling）保证 $dy^2 + dz^2 \le r^2$，减少 clamp 导致的偏置。
+- 喷口读取 `Eulerian3dPara::source`（因为 UI 的 source 面板目前编辑的是 Eulerian3d 的 source；这样 UI 改源能直接影响 PIC3d 喷口）。
+
+---
+
+## 9) UI：球半径 + 相机参数（PIC 3D）
+
+对应文件：`ui/src/InspectorView.cpp`（`case 6`）
+
+- 新增 `Sphere Radius (cells)`：绑定 `PIC3dPara::sphereRadiusCells`。
+- 新增 `Camera` 区块（仿照 Eulerian3d）：直接编辑 `Glb::Camera::Instance()` 的
+  - `mPosition`
+  - `mYaw / mPitch`
+  - `fovyDeg / aspect / nearPlane / farPlane`
+  - 并提供按钮调用 `UpdateView()`
+
+---
+
+## 10) 变更清单（补充）
+
+- `common/include/Configure.h`
+  - 新增 `PIC3dPara::sphereRadiusCells`
+- `common/src/Configure.cpp`
+  - 默认 `PIC3dPara::sphereRadiusCells = 6.5f`
+- `fluid3d/PIC/include/PICGrid3d.h`
+  - 增加中心球 SDF/solid face 支持（接口/辅助函数）
+- `fluid3d/PIC/src/PICGrid3d.cpp`
+  - center sphere solid cell 生成、face-center solid face 判定
+  - X+ outflow（右侧边界不当作 solid face）
+- `fluid3d/PIC/src/ParticleSystem3d.cpp`
+  - 面上圆盘喷口采样（YZ plane）
+- `ui/src/InspectorView.cpp`
+  - PIC 3d 面板新增 Sphere Radius 与 Camera 参数
