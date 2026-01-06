@@ -1,6 +1,6 @@
 /**
- * InspectorView.cpp: ¼ìÊÓÆ÷ÊÓÍ¼ÊµÏÖÎÄ¼þ
- * ÏÔÊ¾ºÍ±à¼­Á÷ÌåÄ£Äâ²ÎÊý
+ * InspectorView.cpp: ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¼Êµï¿½ï¿½ï¿½Ä¼ï¿½
+ * ï¿½ï¿½Ê¾ï¿½Í±à¼­ï¿½ï¿½ï¿½ï¿½Ä£ï¿½ï¿½ï¿½ï¿½ï¿½
  */
 
 #include "InspectorView.h"
@@ -8,48 +8,48 @@
 namespace FluidSimulation
 {
 	/**
-	 * Ä¬ÈÏ¹¹Ôìº¯Êý
+	 * Ä¬ï¿½Ï¹ï¿½ï¿½ìº¯ï¿½ï¿½
 	 */
 	InspectorView::InspectorView()
 	{
-		// Ä¬ÈÏ¹¹Ôìº¯Êý
+		// Ä¬ï¿½Ï¹ï¿½ï¿½ìº¯ï¿½ï¿½
 	}
 
 	/**
-	 * ¹¹Ôìº¯Êý
-	 * @param window GLFW´°¿Ú
+	 * ï¿½ï¿½ï¿½ìº¯ï¿½ï¿½
+	 * @param window GLFWï¿½ï¿½ï¿½ï¿½
 	 */
 	InspectorView::InspectorView(GLFWwindow *window)
 	{
-		// ±£´æ´°¿ÚÖ¸Õë²¢³õÊ¼»¯
+		// ï¿½ï¿½ï¿½æ´°ï¿½ï¿½Ö¸ï¿½ë²¢ï¿½ï¿½Ê¼ï¿½ï¿½
 		this->window = window;
 		showID = false;
 	}
 
 	/**
-	 * ÏÔÊ¾¼ìÊÓÆ÷ÊÓÍ¼
-	 * ÏÔÊ¾Ä£Äâ·½·¨Ñ¡Ôñ¡¢¿ØÖÆ°´Å¥ºÍ²ÎÊý±à¼­½çÃæ
+	 * ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¼
+	 * ï¿½ï¿½Ê¾Ä£ï¿½â·½ï¿½ï¿½Ñ¡ï¿½ñ¡¢¿ï¿½ï¿½Æ°ï¿½Å¥ï¿½Í²ï¿½ï¿½ï¿½ï¿½à¼­ï¿½ï¿½ï¿½ï¿½
 	 */
 	void InspectorView::display()
 	{
-		// ´´½¨¼ìÊÓÆ÷´°¿Ú
+		// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		ImGui::Begin("Inspector", NULL, ImGuiWindowFlags_NoCollapse);
 
-		// ÉèÖÃUIÑùÊ½
+		// ï¿½ï¿½ï¿½ï¿½UIï¿½ï¿½Ê½
 		ImGui::PushItemWidth(200);
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(20.0f, 7.0f));
 
-		// ÏÔÊ¾Ä£Äâ·½·¨Ñ¡ÔñÏÂÀ­¿ò
+		// ï¿½ï¿½Ê¾Ä£ï¿½â·½ï¿½ï¿½Ñ¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		ImGui::Text("Simulation Method:");
 		if (ImGui::BeginCombo("methods", Manager::getInstance().getMethod() == NULL ? NULL : Manager::getInstance().getMethod()->description))
 		{
-			// ÁÐ³öËùÓÐ¿ÉÓÃµÄÄ£Äâ·½·¨
+			// ï¿½Ð³ï¿½ï¿½ï¿½ï¿½Ð¿ï¿½ï¿½Ãµï¿½Ä£ï¿½â·½ï¿½ï¿½
 			for (int i = 0; i < methodComponents.size(); i++)
 			{
 				bool is_selected = (Manager::getInstance().getMethod() == methodComponents[i]);
 				if (ImGui::Selectable(methodComponents[i]->description, is_selected))
 				{
-					// ÇÐ»»Ä£Äâ·½·¨
+					// ï¿½Ð»ï¿½Ä£ï¿½â·½ï¿½ï¿½
 					if (Manager::getInstance().getMethod() != methodComponents[i])
 					{
 						if (Manager::getInstance().getMethod() != NULL)
@@ -67,7 +67,7 @@ namespace FluidSimulation
 			ImGui::EndCombo();
 		}
 
-		// ÏÔÊ¾¿ØÖÆ°´Å¥
+		// ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½Æ°ï¿½Å¥
 		ImGui::SetNextItemWidth(300);
 		if (ImGui::Button(simulating ? "Stop" : "Continue"))
 		{
@@ -90,7 +90,31 @@ namespace FluidSimulation
 
 			simulating = false;
 			Manager::getInstance().getSceneView()->texture = -1;
+			Manager::getInstance().getSceneView()->captureFrameNum = 0;
 			Glb::Logger::getInstance().addLog("Rerun succeeded.");
+		}
+
+		// è°ƒè¯•æ•èŽ·æŽ§åˆ¶
+		ImGui::Separator();
+		ImGui::Text("Debug Capture:");
+		if (!Glb::DebugCapture::getInstance().isCapturing()) {
+			if (ImGui::Button("Start Capture")) {
+				Glb::DebugCapture::getInstance().startSession();
+				if (Manager::getInstance().getMethod() != NULL) {
+					Glb::DebugCapture::getInstance().saveConfig(Manager::getInstance().getMethod()->description);
+					Glb::DebugCapture::getInstance().saveCamera();
+				}
+				Manager::getInstance().getSceneView()->captureFrameNum = 0;
+				Glb::Logger::getInstance().addLog("Capture started: " + Glb::DebugCapture::getInstance().getSessionPath());
+			}
+		} else {
+			if (ImGui::Button("Stop Capture")) {
+				Glb::DebugCapture::getInstance().saveCamera();
+				Glb::DebugCapture::getInstance().endSession();
+				Glb::Logger::getInstance().addLog("Capture stopped.");
+			}
+			ImGui::SameLine();
+			ImGui::Text("Recording...");
 		}
 
 		ImGui::Separator();

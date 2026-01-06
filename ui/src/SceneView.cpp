@@ -1,6 +1,6 @@
 /**
- * SceneView.cpp: ³¡¾°ÊÓÍ¼ÊµÏÖÎÄ¼ş
- * ÊµÏÖäÖÈ¾½á¹ûÏÔÊ¾ºÍÊó±ê½»»¥
+ * SceneView.cpp: ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¼Êµï¿½ï¿½ï¿½Ä¼ï¿½
+ * Êµï¿½ï¿½ï¿½ï¿½È¾ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½ê½»ï¿½ï¿½
  */
 
 #include "SceneView.h"
@@ -8,25 +8,25 @@
 namespace FluidSimulation {
 
 	/**
-	 * Ä¬ÈÏ¹¹Ôìº¯Êı
+	 * Ä¬ï¿½Ï¹ï¿½ï¿½ìº¯ï¿½ï¿½
 	 */
 	SceneView::SceneView() {
 
 	}
 
 	/**
-	 * ¹¹Ôìº¯Êı
-	 * @param window GLFW´°¿Ú
+	 * ï¿½ï¿½ï¿½ìº¯ï¿½ï¿½
+	 * @param window GLFWï¿½ï¿½ï¿½ï¿½
 	 */
 	SceneView::SceneView(GLFWwindow* window) {
 		this->window = window;
         glfwMakeContextCurrent(window);
-        texture = -1;   // ³õÊ¼»¯Îª-1£¬±íÊ¾ÎŞÎÆÀí
+        texture = -1;   // ï¿½ï¿½Ê¼ï¿½ï¿½Îª-1ï¿½ï¿½ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	}
 
 	/**
-	 * ÏÔÊ¾³¡¾°ÊÓÍ¼
-	 * »æÖÆäÖÈ¾ÎÆÀí²¢´¦ÀíÊó±ê½»»¥£¨Ğı×ª¡¢ÒÆ¶¯¡¢Ëõ·ÅÏà»ú£©
+	 * ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¼
+	 * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ê½»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½ï¿½Æ¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	 */
 	void SceneView::display() {
 
@@ -44,6 +44,12 @@ namespace FluidSimulation {
                 texture = Manager::getInstance().getMethod()->getRenderedTexture();
                 Glb::Timer::getInstance().timeFPS();
             }
+
+            // è°ƒè¯•æ•è·
+            if (Glb::DebugCapture::getInstance().isCapturing()) {
+                Glb::DebugCapture::getInstance().captureFrame(texture, captureFrameNum++);
+            }
+
             ImGui::Text(("FPS: " + Glb::Timer::getInstance().getFPS()).c_str());
         }
 

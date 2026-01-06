@@ -18,6 +18,7 @@
 #include "Global.h"
 
 #include "Manager.h"
+#include "DebugCapture.h"
 #include <thread>
 
 
@@ -32,14 +33,16 @@ namespace FluidSimulation {
 
 		GLuint texture;
 
-		// ¼ì²âÊó±êÊÇ·ñÍ£ÁôÔÚäÖÈ¾½çÃæ
+		// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç·ï¿½Í£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È¾ï¿½ï¿½ï¿½ï¿½
 		bool isMouseHovering = false;
-		// Êó±êÍÏ¶¯×´Ì¬
+		// ï¿½ï¿½ï¿½ï¿½Ï¶ï¿½×´Ì¬
 		bool isLeftMouseDragging = false;
 		bool isRightMouseDragging = false;
 		double lastMouseX = 0.0;
 		double lastMouseY = 0.0;
 		double mouseX, mouseY;
+
+		int captureFrameNum = 0;
 
 	public:
 		SceneView();

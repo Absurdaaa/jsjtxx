@@ -2,38 +2,39 @@
 #ifndef __INSPECTOR_VIEW_H__
 #define __INSPECTOR_VIEW_H__
 
-// OpenGLÏà¹ØÍ·ÎÄ¼ş
+// OpenGLï¿½ï¿½ï¿½Í·ï¿½Ä¼ï¿½
 #include "glad/glad.h"
 #include "glfw3.h"
 
-// ImGuiÏà¹ØÍ·ÎÄ¼ş
+// ImGuiï¿½ï¿½ï¿½Í·ï¿½Ä¼ï¿½
 #include "imgui.h"
 #include "imgui_internal.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 
-// ÏîÄ¿Ïà¹ØÍ·ÎÄ¼ş
+// ï¿½ï¿½Ä¿ï¿½ï¿½ï¿½Í·ï¿½Ä¼ï¿½
 #include "Configure.h"
 #include "Manager.h"
 #include "Logger.h"
+#include "DebugCapture.h"
 
 #include <iostream>
 #include <string>
 
 namespace FluidSimulation {
-	// ¼ìÊÓÆ÷ÊÓÍ¼Àà
-	// ¸ºÔğÏÔÊ¾ºÍ±à¼­µ±Ç°Á÷ÌåÄ£Äâ·½·¨µÄ²ÎÊı
+	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¼ï¿½ï¿½
+	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾ï¿½Í±à¼­ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½Ä£ï¿½â·½ï¿½ï¿½ï¿½Ä²ï¿½ï¿½ï¿½
 	class InspectorView {
 	private:
-		GLFWwindow* window;	// GLFW´°¿Ú
-		ImVec2 pos;			// ÊÓÍ¼Î»ÖÃ
+		GLFWwindow* window;	// GLFWï¿½ï¿½ï¿½ï¿½
+		ImVec2 pos;			// ï¿½ï¿½Í¼Î»ï¿½ï¿½
 
 	public:
-		int showID;			// ÊÇ·ñÏÔÊ¾×é¼şID
+		int showID;			// ï¿½Ç·ï¿½ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ID
 
 		InspectorView();
 		InspectorView(GLFWwindow* window);
-		void display();		// ÏÔÊ¾²ÎÊı±à¼­Ãæ°å
+		void display();		// ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½ï¿½à¼­ï¿½ï¿½ï¿½
 	};
 }
 
