@@ -1,5 +1,5 @@
-#include "PIC/include/Solver.h"
-#include "GridData2d.h"
+#include "../include/Solver.h"
+#include "../../../common/include/GridData2d.h"
 #include <cmath>
 
 namespace FluidSimulation
@@ -170,6 +170,21 @@ namespace FluidSimulation
       const int nx = mGrid.dim[PICGrid2d::X];
       const int ny = mGrid.dim[PICGrid2d::Y];
       const float h = mGrid.cellSize;
+
+      // 风力：对 u-face 施加一个向右的加速度（更像“风”而不是强行设速度）
+      // 注意：这会在投影前添加动量，随后 pressureProjection 会把它变成无散度的流动。
+      if (std::abs(PIC2dPara::windX) > 1e-8f)
+      {
+        const float a = PIC2dPara::windX;
+        for (int j = 0; j < ny; ++j)
+        {
+          for (int i = 1; i < nx; ++i) // 跳过左墙(i=0)，右侧(i=nx)是出口面
+          {
+            if (mGrid.isSolidFace(i, j, PICGrid2d::X)) continue;
+            mGrid.mU(i, j) += (float)dt * a;
+          }
+        }
+      }
 
       // 只添加浮力（烟雾模拟）
       // for (int j = 1; j < ny; ++j)  // 跳过边界

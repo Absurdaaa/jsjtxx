@@ -421,3 +421,19 @@ gridResY = simNy * renderScale;
 - 若 `dt=0.01`、`h=0.5`，那么 `u=50` 大约每步走 1 个格子；`u=500` 会每步走 10 个格子（会更硬、更容易穿模/数值扩散）。
 
 如果你希望我把“球心/半径/出口开闭/喷射速度”都做成 UI 可调参数（而不是写死在 `PICGrid2d` 里），我可以下一步把它们搬到 `PIC2dPara`。
+
+### 6.5 向右风力（windX）+ UI 可调
+
+你提出的“整体向右的风”，我按 **加速度** 的方式实现（更符合物理：先加动量，随后投影把它变成无散度流动）。
+
+对应文件：
+
+- `common/include/Configure.h`：新增 `PIC2dPara::windX`
+- `common/src/Configure.cpp`：默认值 `PIC2dPara::windX = 0.0f`
+- `fluid2d/PIC/src/Solver.cpp`：`Solver::addForces()` 中对 `mU`（u-face）施加 `dt * windX`
+- `ui/src/InspectorView.cpp`：在 **PIC 2d** 面板新增 `Wind X (accel)` 滑条
+
+备注：
+
+- `windX > 0` 表示向右吹；`windX < 0` 表示向左吹。
+- 风是在投影前添加，因此不会破坏不可压缩约束。

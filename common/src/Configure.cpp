@@ -109,10 +109,13 @@ namespace PIC2dPara
   float boussinesqAlpha = 500.0; // Boussinesq����ʽ�е�alpha����
   float boussinesqBeta = 2500.0; // Boussinesq����ʽ�е�beta����
 
-  int particlesPerStep = 100;
+  int particlesPerStep = 5000;
   float emissionJitter = 0.3f;
   float wallRestitution = 0.1f;
-    int emitterRadius = 10; // 发射源半径（格子数），1 表示覆盖中心及邻格
+    int emitterRadius = 20; // 发射源半径（格子数），1 表示覆盖中心及邻格
+
+    // 风：默认关闭（0）。如果你希望一直向右吹，可以设为正值（例如 50~200）
+    float windX = 0.0f;
 }
 
 // 3D PIC 混合方法参数

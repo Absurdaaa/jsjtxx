@@ -158,6 +158,9 @@ namespace PIC2dPara
   extern float emissionJitter;  // 发射抖动系数（以cell size为单位）
   extern float wallRestitution; // 边界弹性系数
     extern int emitterRadius;     // 发射源半径（以格子为单位），0 表示单格
+
+    // 外力：风（向右为正）。单位建议理解为“加速度”(world units / s^2)
+    extern float windX;
 }
 
 /**
