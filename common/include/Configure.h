@@ -158,6 +158,9 @@ namespace PIC2dPara
   extern float emissionJitter;  // 发射抖动系数（以cell size为单位）
   extern float wallRestitution; // 边界弹性系数
     extern int emitterRadius;     // 发射源半径（以格子为单位），0 表示单格
+
+    // 外力：风（向右为正）。单位建议理解为“加速度”(world units / s^2)
+    extern float windX;
 }
 
 /**
@@ -201,6 +204,9 @@ namespace PIC3dPara
   extern float boussinesqAlpha;
   extern float boussinesqBeta;
   extern float vorticityConst;
+
+    // 压力投影迭代次数（Gauss-Seidel）。数值越大越接近无散度，但更慢。
+    extern int pressureIters;
 
   extern int particlesPerStep;
   extern float emissionJitter;

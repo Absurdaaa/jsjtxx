@@ -298,39 +298,42 @@ namespace FluidSimulation
 			// PIC 2d
 			case 3:
 				ImGui::Text("PIC 2d:");
-				ImGui::SliderFloat("Delta Time", &Eulerian2dPara::dt, 0.0001f, 0.05f, "%.5f");
+				ImGui::SliderFloat("Delta Time", &PIC2dPara::dt, 0.0001f, 0.05f, "%.5f");
 				ImGui::InputInt("Particles / Source / Step", &PIC2dPara::particlesPerStep);
 				ImGui::SliderFloat("Emission Jitter (cell)", &PIC2dPara::emissionJitter, 0.0f, 1.0f);
 				ImGui::InputInt("Emitter Radius (cells)", &PIC2dPara::emitterRadius);
 				ImGui::SliderFloat("Wall Restitution", &PIC2dPara::wallRestitution, 0.0f, 1.0f);
+				ImGui::SliderFloat("Wind X (accel)", &PIC2dPara::windX, -50.0f, 50.0f, "%.3f");
 				ImGui::Separator();
 				ImGui::Text("MAC grid:");
 				ImGui::PushItemWidth(150);
-				ImGui::InputScalar("Dim.x", ImGuiDataType_S32, &Eulerian2dPara::theDim2d[0], &intStep, NULL);
-				ImGui::InputScalar("Dim.y", ImGuiDataType_S32, &Eulerian2dPara::theDim2d[1], &intStep, NULL);
+				ImGui::InputScalar("Dim.x", ImGuiDataType_S32, &PIC2dPara::theDim2d[0], &intStep, NULL);
+				ImGui::InputScalar("Dim.y", ImGuiDataType_S32, &PIC2dPara::theDim2d[1], &intStep, NULL);
 				ImGui::PopItemWidth();
-				ImGui::InputFloat("Cell Size", &Eulerian2dPara::theCellSize2d, 0.01f, 0.1f, "%.3f");
-				ImGui::Checkbox("Add Solid", &Eulerian2dPara::addSolid);
+				ImGui::InputFloat("Cell Size", &PIC2dPara::theCellSize2d, 0.01f, 0.1f, "%.3f");
+				ImGui::Checkbox("Add Solid", &PIC2dPara::addSolid);
 				ImGui::Separator();
 				ImGui::Text("Sources:");
-				for (int i = 0; i < Eulerian2dPara::source.size(); i++) {
+				for (int i = 0; i < PIC2dPara::source.size(); i++) {
 					ImGui::Text(("source grid " + std::to_string(i)).c_str());
 					ImGui::PushID(i);
 					ImGui::SameLine();
 					if (ImGui::Button("delete")) {
-						Eulerian2dPara::source.erase(Eulerian2dPara::source.begin() + i);
+						PIC2dPara::source.erase(PIC2dPara::source.begin() + i);
 						i--;
 					}
 					else {
-						ImGui::InputInt2("position(x,y)", &Eulerian2dPara::source[i].position.x);
-						ImGui::InputFloat2("velocity(x,y)", &Eulerian2dPara::source[i].velocity.x);
+						ImGui::InputInt2("position(x,y)", &PIC2dPara::source[i].position.x);
+						ImGui::InputFloat2("velocity(x,y)", &PIC2dPara::source[i].velocity.x);
+						ImGui::InputScalar("density", ImGuiDataType_Float, &PIC2dPara::source[i].density, &floatStep1, NULL);
+						ImGui::InputScalar("temperature", ImGuiDataType_Float, &PIC2dPara::source[i].temp, &floatStep1, NULL);
 					}
 					ImGui::PopID();
 					ImGui::Text("---------------------------------");
 				}
 
 				if (ImGui::Button("add source grid")) {
-					Eulerian2dPara::source.push_back(Eulerian2dPara::SourceSmoke({}));
+					PIC2dPara::source.push_back(PIC2dPara::SourceSmoke({}));
 				}
 
 				ImGui::Text("note: Please rerun after setting");
@@ -503,11 +506,12 @@ namespace FluidSimulation
 			case 6:
 				// PIC 3d
 				ImGui::Text("PIC 3d:");
-				ImGui::SliderFloat("Delta Time", &Eulerian3dPara::dt, 0.0001f, 0.1f, "%.5f");
+				ImGui::SliderFloat("Delta Time", &PIC3dPara::dt, 0.0001f, 0.1f, "%.5f");
 				ImGui::InputInt("Particles / Source / Step", &PIC3dPara::particlesPerStep);
 				ImGui::SliderFloat("Emission Jitter (cell)", &PIC3dPara::emissionJitter, 0.0f, 1.0f);
 				ImGui::InputInt("Emitter Radius (cells)", &PIC3dPara::emitterRadius);
 				ImGui::SliderFloat("Wall Restitution", &PIC3dPara::wallRestitution, 0.0f, 1.0f);
+				ImGui::InputInt("Pressure Iters", &PIC3dPara::pressureIters);
 				ImGui::Separator();
 				ImGui::Text("MAC grid:");
 				ImGui::PushItemWidth(150);
