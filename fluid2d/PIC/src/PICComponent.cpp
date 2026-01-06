@@ -31,8 +31,8 @@ namespace FluidSimulation
 
         GLuint PICComponent::getRenderedTexture()
         {
-            if (renderer && ps)
-                renderer->draw(*ps);
+            if (renderer && ps && grid)
+                renderer->draw(*ps, *grid);
             return renderer ? renderer->getTextureID() : 0;
         }
     }

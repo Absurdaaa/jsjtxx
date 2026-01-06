@@ -25,11 +25,10 @@ namespace FluidSimulation
                     int dy = idist(rng);
                     int cellX = src.position.x + dx;
                     int cellY = src.position.y + dy;
-                    // clamp to grid
-                    cellX = cellX < PIC2dPara::theDim2d[0] ? cellX : PIC2dPara::theDim2d[0] - 1;
-                    cellX = cellX > 0 ? cellX : 0;
-                    cellY = cellY < PIC2dPara::theDim2d[1] ? cellY : PIC2dPara::theDim2d[1] - 1;
-                    cellY = cellY > 0 ? cellY : 0;
+                    // 跳过越界的粒子，而不是 clamp（避免边界堆积）
+                    if (cellX < 0 || cellX >= PIC2dPara::theDim2d[0] ||
+                        cellY < 0 || cellY >= PIC2dPara::theDim2d[1])
+                        continue;
 
                     float baseX = (cellX + 0.5f) * h;
                     float baseY = (cellY + 0.5f) * h;
