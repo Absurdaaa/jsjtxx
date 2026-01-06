@@ -353,3 +353,71 @@ gridResY = simNy * renderScale;
 
 - 继续用 GS/SOR（简单、够用）
 - 还是上 PCG（更专业、可扩展）
+
+---
+
+## 6) 场景：向右吹的烟雾 + 中间“球” + 右侧出口（绕球后流出）
+
+你提到“球的边界不是曲线而是直线”，根因是：
+
+- 以前固体主要通过 **cell 标记**（`mSolid(i,j)=1`）参与求解与碰撞，边界天然是“格子阶梯”。
+- 半拉格朗日/碰撞还会用 **AABB cell** 来做相交/修正，视觉上更像直线/折线。
+
+我已经把 2D PIC 的 solid 处理升级为“**圆形 SDF（世界坐标）+ 面中心判定**”，在不大改求解器的前提下，让边界更接近圆。
+
+### 6.1 圆形障碍（球）怎么定义
+
+对应文件：`fluid2d/PIC/src/PICGrid2d.cpp`
+
+- 圆心（世界坐标）：域中心
+- 半径：默认取 `dimY/10` 个格子（至少 2 个格子）
+
+并且：
+
+- `createSolids()` 仍然会填充 `mSolid`（cell-center 采样 SDF），用于 pressure Poisson 的 cell-based 结构。
+- `isSolidFace()` 改为在 **面中心**做圆形判定：
+    - $u$ 面中心：$(i\,h,\,(j+0.5)\,h)$
+    - $v$ 面中心：$((i+0.5)\,h,\,j\,h)$
+
+这会显著减少“阶梯边界”对速度场的影响（绕球更圆）。
+
+### 6.2 右侧出口（开边界）
+
+对应文件：
+
+- `fluid2d/PIC/src/PICGrid2d.cpp`：`isSolidFace()`
+- `fluid2d/PIC/src/Solver.cpp`：`addForces()`、`pressureProjection()` 的散度计算
+
+约定：
+
+- 左/上/下 是墙（no-penetration）
+- **右侧是出口**：不再把 `u(i=nx, j)` 当成固体面，也不再强制设为 0。
+
+实现要点：
+
+- `addForces()` 不再把 `mU(nx, j)=0`（避免把出口封死）
+- 投影里散度计算改为基于 `isSolidFace()`，对最后一列 cell 会直接使用 `u(nx, j)` 作为右通量。
+- Poisson 解仍然是 cell-based（边界外不作为邻居），等价于出口处近似 $\partial p/\partial n=0$（不会把出口速度硬压回 0）。
+
+### 6.3 粒子碰撞更“圆”
+
+对应文件：
+
+- `fluid2d/PIC/include/PICGrid2d.h`
+- `fluid2d/PIC/src/PICGrid2d.cpp`
+- `fluid2d/PIC/src/Solver.cpp`
+
+新增了两个接口：
+
+- `PICGrid2d::getSolidNormal(pt)`：返回墙/圆形障碍的外法线
+- `PICGrid2d::projectOutOfSolid(pt, eps)`：把点投影到固体外
+
+`Solver::advectParticles()` 碰到固体后，会用这两个接口反弹并把粒子推出去，因此绕球时轨迹更贴合曲线。
+
+### 6.4 你现在想要的默认喷射
+
+你的 `common/src/Configure.cpp` 里 `PIC2dPara::source` 已经是：左侧中间向右喷射。要让它更稳定、更像“风吹烟”，推荐把速度量级控制在“每步走几格”以内：
+
+- 若 `dt=0.01`、`h=0.5`，那么 `u=50` 大约每步走 1 个格子；`u=500` 会每步走 10 个格子（会更硬、更容易穿模/数值扩散）。
+
+如果你希望我把“球心/半径/出口开闭/喷射速度”都做成 UI 可调参数（而不是写死在 `PICGrid2d` 里），我可以下一步把它们搬到 `PIC2dPara`。

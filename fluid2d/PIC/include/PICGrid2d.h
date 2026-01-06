@@ -182,6 +182,20 @@ namespace FluidSimulation
                  * 获取任意点的渲染颜色
                  */
                 glm::vec4 getRenderColor(const glm::vec2 &pt);  
+
+                // ----------- 连续固体几何（用于更圆滑的碰撞/边界） -----------
+
+                /**
+                 * 获取点 pt 处固体外法线（墙/圆形障碍）
+                 * 若 pt 不在固体内，仍会返回一个合理方向（可能不被使用）
+                 */
+                glm::vec2 getSolidNormal(const glm::vec2 &pt) const;
+
+                /**
+                 * 将点 pt 投影到固体外（墙/圆形障碍）
+                 * @param eps 推出距离（世界单位）
+                 */
+                glm::vec2 projectOutOfSolid(const glm::vec2 &pt, float eps) const;
             
                 // ----------- 网格参数与数据 -----------
                 ///< 网格单元大小
@@ -194,6 +208,17 @@ namespace FluidSimulation
                 Glb::CubicGridData2d mD;  ///< 密度场
                 Glb::CubicGridData2d mT;  ///< 温度场
                 Glb::GridData2d mSolid;   ///< 固体标记场
+
+            private:
+                // 场景：一个圆形障碍（“球”）
+                // 使用世界坐标的 SDF 来获得更平滑的边界判定
+                glm::vec2 mCircleCenter{0.0f};
+                float mCircleRadius = 0.0f;
+
+                float circleSDF(const glm::vec2 &pt) const;
+                bool inCircle(const glm::vec2 &pt) const;
+                glm::vec2 circleNormal(const glm::vec2 &pt) const;
+                glm::vec2 projectOutOfCircle(const glm::vec2 &pt, float eps) const;
             };
 
 // macros

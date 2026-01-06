@@ -7,12 +7,47 @@ namespace FluidSimulation
 {
     namespace PIC2d
     {
+        float PICGrid2d::circleSDF(const glm::vec2 &pt) const
+        {
+            if (mCircleRadius <= 0.0f) return 1e9f;
+            return glm::length(pt - mCircleCenter) - mCircleRadius;
+        }
+
+        bool PICGrid2d::inCircle(const glm::vec2 &pt) const
+        {
+            return circleSDF(pt) <= 0.0f;
+        }
+
+        glm::vec2 PICGrid2d::circleNormal(const glm::vec2 &pt) const
+        {
+            glm::vec2 d = pt - mCircleCenter;
+            float len = glm::length(d);
+            if (len < 1e-8f) return glm::vec2(1.0f, 0.0f);
+            return d / len;
+        }
+
+        glm::vec2 PICGrid2d::projectOutOfCircle(const glm::vec2 &pt, float eps) const
+        {
+            glm::vec2 n = circleNormal(pt);
+            return mCircleCenter + n * (mCircleRadius + eps);
+        }
+
         // 构造函数：根据全局参数初始化网格尺寸和单元大小，并初始化所有网格数据
         PICGrid2d::PICGrid2d()
         {
             cellSize = PIC2dPara::theCellSize2d; // 单元大小
             dim[0] = PIC2dPara::theDim2d[0];     // x方向格点数
             dim[1] = PIC2dPara::theDim2d[1];     // y方向格点数
+
+            // 场景：中间一个圆形障碍（世界坐标）
+            // 域为 [0, nx*h] x [0, ny*h]
+            float domainW = dim[0] * cellSize;
+            float domainH = dim[1] * cellSize;
+            mCircleCenter = glm::vec2(domainW * 0.5f, domainH * 0.5f);
+            // 半径：默认取高度的 10%（至少 2 个格子）
+            float rCells = 2 > (dim[1] * 0.1f) ? 2.0f : (dim[1] * 0.1f);
+            mCircleRadius = rCells * cellSize;
+
             initialize(); // 初始化所有网格数据
         }
 
@@ -63,20 +98,14 @@ namespace FluidSimulation
             mSolid.initialize(); // 全部初始化为流体
             if (PIC2dPara::addSolid)
             {
-                // 将固体设置为一个圆形障碍，位于域中心稍偏上的位置（空中球体效果）
-                int cx = dim[0] / 2; // 圆心（格子索引）
-                int cy = dim[1] / 2; // 放在中间高度
-                // 半径按网格高度的一定比例，例如总高度的1/6
-                int radius = dim[1] / 10;
-                if (radius < 2) radius = 2;
                 for (int j = 0; j < dim[1]; ++j)
                 {
                     for (int i = 0; i < dim[0]; ++i)
                     {
-                        int dx = i - cx;
-                        int dy = j - cy;
-                        if (dx * dx + dy * dy <= radius * radius)
-                            mSolid(i, j) = 1; // 设置为固体
+                        // 用 cell-center 的 SDF 填 solid（压力投影仍是 cell-based）
+                        glm::vec2 c = getCenter(i, j);
+                        if (inCircle(c))
+                            mSolid(i, j) = 1;
                     }
                 }
             }
@@ -117,12 +146,51 @@ namespace FluidSimulation
         // 计算(i,j)处的速度散度
         double PICGrid2d::getDivergence(int i, int j)
         {
-            double x1 = isSolidCell(i + 1, j) ? 0.0 : mU(i + 1, j);
-            double x0 = isSolidCell(i - 1, j) ? 0.0 : mU(i, j);
-            double y1 = isSolidCell(i, j + 1) ? 0.0 : mV(i, j + 1);
-            double y0 = isSolidCell(i, j - 1) ? 0.0 : mV(i, j);
-            double div = (x1 - x0 + y1 - y0) / cellSize;
+            // 用面是否 solid 来判断（更适配圆形边界、以及右侧开边界）
+            double uR = isSolidFace(i + 1, j, PICGrid2d::X) ? 0.0 : mU(i + 1, j);
+            double uL = isSolidFace(i,     j, PICGrid2d::X) ? 0.0 : mU(i,     j);
+            double vT = isSolidFace(i, j + 1, PICGrid2d::Y) ? 0.0 : mV(i, j + 1);
+            double vB = isSolidFace(i, j,     PICGrid2d::Y) ? 0.0 : mV(i, j);
+            double div = (uR - uL + vT - vB) / cellSize;
             return div;
+        }
+
+        glm::vec2 PICGrid2d::getSolidNormal(const glm::vec2 &pt) const
+        {
+            float domainW = dim[0] * cellSize;
+            float domainH = dim[1] * cellSize;
+
+            // 墙：左/下/上
+            if (pt.x < 0.0f) return glm::vec2(1.0f, 0.0f);
+            if (pt.y < 0.0f) return glm::vec2(0.0f, 1.0f);
+            if (pt.y > domainH) return glm::vec2(0.0f, -1.0f);
+
+            // 圆形障碍
+            if (PIC2dPara::addSolid && inCircle(pt))
+                return circleNormal(pt);
+
+            // 右侧是出口：不返回墙法线
+            if (pt.x > domainW) return glm::vec2(1.0f, 0.0f);
+            return glm::vec2(1.0f, 0.0f);
+        }
+
+        glm::vec2 PICGrid2d::projectOutOfSolid(const glm::vec2 &pt, float eps) const
+        {
+            float domainW = dim[0] * cellSize;
+            float domainH = dim[1] * cellSize;
+
+            // 圆形障碍：投影到圆表面外
+            if (PIC2dPara::addSolid && inCircle(pt))
+                return projectOutOfCircle(pt, eps);
+
+            // 墙：左/下/上
+            glm::vec2 p = pt;
+            if (p.x < 0.0f) p.x = 0.0f + eps;
+            if (p.y < 0.0f) p.y = 0.0f + eps;
+            if (p.y > domainH) p.y = domainH - eps;
+            // 右侧出口不做投影
+            if (p.x > domainW) p.x = domainW + eps;
+            return p;
         }
 
         // 检查(i,j)处的散度（不考虑固体）
@@ -154,17 +222,16 @@ namespace FluidSimulation
             glm::vec2 vel = getVelocity(pt); // 当前速度
             glm::vec2 pos = pt - vel * (float)dt; // 回溯
             // 限制在域内
-            pos[0] = max(0.0, min((dim[0] - 1) * cellSize, pos[0]));
-            pos[1] = max(0.0, min((dim[1] - 1) * cellSize, pos[1]));
+            float domainW = dim[0] * cellSize;
+            float domainH = dim[1] * cellSize;
+            // 右侧是出口：允许 pos.x 贴近右边界，但不再把右侧当 solid
+            pos[0] = (float)max(0.0, min(domainW, (double)pos[0]));
+            pos[1] = (float)max(0.0, min(domainH, (double)pos[1]));
 
-            int i, j;
-            if (inSolid(pt, i, j))
+            // 如果回溯落进圆形固体：把点投影到圆表面外一点
+            if (PIC2dPara::addSolid && inCircle(pos))
             {
-                double t = 0;
-                if (intersects(pt, vel, i, j, t))
-                    pos = pt - vel * (float)t; // 穿越固体时修正
-                else
-                    Glb::Logger::getInstance().addLog("Error: something goes wrong during advection");
+                pos = projectOutOfCircle(pos, 0.25f * cellSize);
             }
             return pos;
         }
@@ -178,7 +245,8 @@ namespace FluidSimulation
             double tmin = -1e18, tmax = 1e18;
             double minv = -0.5 * cellSize;
             double maxv = 0.5 * cellSize;
-            for (int k = 0; k < 3; k++)
+            // vec2 只有 2 个分量
+            for (int k = 0; k < 2; k++)
             {
                 double e = rayStart[k];
                 double f = rayDir[k];
@@ -320,16 +388,23 @@ namespace FluidSimulation
         // 判断点pt是否在固体内
         bool PICGrid2d::inSolid(const glm::vec2 &pt)
         {
-            int i, j;
-            mSolid.getCell(pt, i, j);
-            return isSolidCell(i, j) == 1;
+            float domainW = dim[0] * cellSize;
+            float domainH = dim[1] * cellSize;
+
+            // 左/下/上 是墙；右侧是出口（不算固体）
+            if (pt.x < 0.0f) return true;
+            if (pt.y < 0.0f) return true;
+            if (pt.y > domainH) return true;
+
+            if (PIC2dPara::addSolid && inCircle(pt)) return true;
+            return false;
         }
 
         // 判断点pt是否在固体内，并返回(i,j)
         bool PICGrid2d::inSolid(const glm::vec2 &pt, int &i, int &j)
         {
             mSolid.getCell(pt, i, j);
-            return isSolidCell(i, j) == 1;
+            return inSolid(pt);
         }
 
         // 判断(i,j)是否为固体单元（边界或障碍物）
@@ -343,15 +418,24 @@ namespace FluidSimulation
         // 判断(i,j)在d方向是否为固体面
         int PICGrid2d::isSolidFace(int i, int j, PICGrid2d::Direction d)
         {
-            if (d == X && (i == 0 || i == dim[0]))
-                return 1;
-            else if (d == Y && (j == 0 || j == dim[1]))
-                return 1;
-            if (d == X && (mSolid(i, j) || mSolid(i - 1, j)))
-                return 1;
-            if (d == Y && (mSolid(i, j) || mSolid(i, j - 1)))
-                return 1;
-            return 0;
+            // 域边界：左/下/上为墙；右侧为出口（开边界）
+            if (d == X)
+            {
+                if (i == 0) return 1;
+                if (i == dim[0]) return 0;
+                // 竖直面中心： (i*h, (j+0.5)*h)
+                glm::vec2 facePos(i * cellSize, (j + 0.5f) * cellSize);
+                if (PIC2dPara::addSolid && inCircle(facePos)) return 1;
+                return 0;
+            }
+            else
+            {
+                if (j == 0 || j == dim[1]) return 1;
+                // 水平面中心： ((i+0.5)*h, j*h)
+                glm::vec2 facePos((i + 0.5f) * cellSize, j * cellSize);
+                if (PIC2dPara::addSolid && inCircle(facePos)) return 1;
+                return 0;
+            }
         }
 
         // 判断(i0,j0)与(i1,j1)是否为邻居

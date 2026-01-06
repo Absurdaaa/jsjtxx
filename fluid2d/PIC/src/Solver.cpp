@@ -183,7 +183,7 @@ namespace FluidSimulation
       // }
       
 
-      // 边界速度设为0
+      // 边界速度：左/上/下是墙；右侧是出口（不再把右边界 u 设为 0）
       for (int i = 0; i < nx; ++i)
       {
         mGrid.mV(i, 0) = 0.0;
@@ -192,7 +192,6 @@ namespace FluidSimulation
       for (int j = 0; j < ny; ++j)
       {
         mGrid.mU(0, j) = 0.0;
-        mGrid.mU(nx, j) = 0.0;
       }
     }
 
@@ -204,22 +203,25 @@ namespace FluidSimulation
       const float h = mGrid.cellSize;
       const float scale = dt / (PIC2dPara::airDensity * h * h);
 
-      // 先将固体边界的法向速度设为0
+      // 先将 solid faces 的法向速度设为 0（使用 isSolidFace 的“连续圆形边界”判定）
       for (int j = 0; j < ny; ++j)
+      {
+        for (int i = 0; i <= nx; ++i)
+        {
+          if (mGrid.isSolidFace(i, j, PICGrid2d::X))
+            mGrid.mU(i, j) = 0.0;
+        }
+      }
+      for (int j = 0; j <= ny; ++j)
       {
         for (int i = 0; i < nx; ++i)
         {
-          if (mGrid.isSolidCell(i, j))
-          {
-            mGrid.mU(i, j) = 0;
-            mGrid.mU(i + 1, j) = 0;
-            mGrid.mV(i, j) = 0;
-            mGrid.mV(i, j + 1) = 0;
-          }
+          if (mGrid.isSolidFace(i, j, PICGrid2d::Y))
+            mGrid.mV(i, j) = 0.0;
         }
       }
 
-      // 计算散度
+      // 计算散度（用 solid face 判定，避免靠 solid cell 邻居导致边界误判；右侧出口可自然产生通量）
       Glb::GridData2d div;
       div.initialize(0.0);
 
@@ -230,10 +232,10 @@ namespace FluidSimulation
           if (mGrid.isSolidCell(i, j))
             continue;
 
-          float uRight = mGrid.isSolidCell(i + 1, j) ? 0 : mGrid.mU(i + 1, j);
-          float uLeft = mGrid.isSolidCell(i - 1, j) ? 0 : mGrid.mU(i, j);
-          float vTop = mGrid.isSolidCell(i, j + 1) ? 0 : mGrid.mV(i, j + 1);
-          float vBottom = mGrid.isSolidCell(i, j - 1) ? 0 : mGrid.mV(i, j);
+          float uRight = mGrid.isSolidFace(i + 1, j, PICGrid2d::X) ? 0.0f : (float)mGrid.mU(i + 1, j);
+          float uLeft  = mGrid.isSolidFace(i,     j, PICGrid2d::X) ? 0.0f : (float)mGrid.mU(i,     j);
+          float vTop   = mGrid.isSolidFace(i, j + 1, PICGrid2d::Y) ? 0.0f : (float)mGrid.mV(i, j + 1);
+          float vBottom= mGrid.isSolidFace(i, j,     PICGrid2d::Y) ? 0.0f : (float)mGrid.mV(i, j);
 
           div(i, j) = (uRight - uLeft + vTop - vBottom) / h;
         }
@@ -351,14 +353,10 @@ namespace FluidSimulation
           if (p.position.y < minY) { p.position.y = minY; p.velocity.y *= -restitution; }
           if (p.position.y > maxY) { p.position.y = maxY; p.velocity.y *= -restitution; }
 
-          // 固体碰撞检测
+          // 固体碰撞检测（圆形障碍：用连续法线与投影，边界更圆滑）
           if (mGrid.inSolid(p.position))
           {
-            // 计���碰撞法线（从旧位置指向固体中心的反方向）
-            int ci, cj;
-            mGrid.mSolid.getCell(p.position, ci, cj);
-            glm::vec2 solidCenter = mGrid.getCenter(ci, cj);
-            glm::vec2 normal = glm::normalize(oldPos - solidCenter);
+            glm::vec2 normal = mGrid.getSolidNormal(p.position);
 
             // 分解速度为法向和切向
             float vn = glm::dot(p.velocity, normal);
@@ -370,7 +368,7 @@ namespace FluidSimulation
               p.velocity = -restitution * vNormal + friction * vTangent;
 
             // 将粒子推回到固体外
-            p.position = oldPos;
+            p.position = mGrid.projectOutOfSolid(oldPos, 0.25f * h);
           }
         }
         
