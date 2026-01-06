@@ -16,12 +16,14 @@ namespace FluidSimulation
             const int radius = PIC2dPara::emitterRadius; // emitter radius in cells
             std::uniform_int_distribution<int> idist(radius > 0 ? -radius : 0, radius > 0 ? radius : 0);
 
+            std::uniform_int_distribution<int> xdist(-1, 1);
+
             for (const auto &src : PIC2dPara::source)
             {
                 // 发射位置：可以在源周围 radius 格子内随机分布，形成更粗的喷射
                 for (int n = 0; n < emitN; ++n)
                 {
-                    int dx = idist(rng);
+                    int dx = xdist(rng);
                     int dy = idist(rng);
                     int cellX = src.position.x + dx;
                     int cellY = src.position.y + dy;

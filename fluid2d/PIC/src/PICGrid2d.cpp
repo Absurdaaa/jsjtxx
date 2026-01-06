@@ -120,7 +120,7 @@ namespace FluidSimulation
                 int cx = PIC2dPara::source[i].position.x;
                 int cy = PIC2dPara::source[i].position.y;
                 // 覆盖 emitterRadius 范围内的所有格子
-                for (int dx = -radius; dx <= radius; ++dx)
+                for (int dx = -1; dx <= 1; ++dx)
                 {
                     for (int dy = -radius; dy <= radius; ++dy)
                     {
