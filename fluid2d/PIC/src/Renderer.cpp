@@ -18,9 +18,11 @@ namespace FluidSimulation
             : smokeShader(nullptr), quadVAO(0), quadVBO(0), FBO(0),
               textureID(0), RBO(0), densityTexture(0)
         {
-            // 使用网格分辨率作为密度场分辨率
-            gridResX = PIC2dPara::theDim2d[0];
-            gridResY = PIC2dPara::theDim2d[1];
+            // 密度场分辨率：可独立于模拟网格，保持 FBO + 全屏 quad 管线不变
+            // 适度提高分辨率能显著减少“像素块/糊”的观感（代价：CPU散布更慢）
+            const int renderScale = 2;
+            gridResX = PIC2dPara::theDim2d[0] * renderScale;
+            gridResY = PIC2dPara::theDim2d[1] * renderScale;
             densityData.resize(gridResX * gridResY, 0.0f);
 
             initGLResources();
@@ -42,18 +44,42 @@ namespace FluidSimulation
          */
         void Renderer::updateDensityTexture(const ParticleSystem &ps)
         {
-            const float h = PIC2dPara::theCellSize2d;
-            const float invH = 1.0f / h;
+            // 模拟域尺寸（世界坐标）
+            const float simH = PIC2dPara::theCellSize2d;
+            const float domainW = PIC2dPara::theDim2d[0] * simH;
+            const float domainH = PIC2dPara::theDim2d[1] * simH;
+
+            // 密度网格单元大小（世界坐标）
+            const float densHx = domainW / (float)gridResX;
+            const float densHy = domainH / (float)gridResY;
+            const float invHx = 1.0f / densHx;
+            const float invHy = 1.0f / densHy;
 
             // 清空密度场
             std::fill(densityData.begin(), densityData.end(), 0.0f);
 
+            // 二次 B-spline 核（3x3）散布：权重非负且和为 1（避免负权重导致“钳制后质量变大”）
+            // x: fractional in [0,1)
+            // 覆盖 i0-1, i0, i0+1
+            auto bspline2 = [](float x) {
+                float w0 = 0.5f * (1.0f - x) * (1.0f - x);
+                float w1 = 0.75f - (x - 0.5f) * (x - 0.5f);
+                float w2 = 0.5f * x * x;
+                // 数值保险（理论上不会为负）
+                w0 = (w0 < 0.0f) ? 0.0f : w0;
+                w1 = (w1 < 0.0f) ? 0.0f : w1;
+                w2 = (w2 < 0.0f) ? 0.0f : w2;
+                return glm::vec3(w0, w1, w2);
+            };
+
             // 将每个粒子的贡献散布到周围网格
+            // 这相当于“每粒子密度质量”；太大容易整屏发白，太小则看不见。
+            const float densityPerParticle = 0.15f;
             for (const auto &p : ps.particles)
             {
                 // 计算粒子在网格中的位置
-                float fx = p.position.x * invH - 0.5f;
-                float fy = p.position.y * invH - 0.5f;
+                float fx = p.position.x * invHx - 0.5f;
+                float fy = p.position.y * invHy - 0.5f;
 
                 int i0 = (int)std::floor(fx);
                 int j0 = (int)std::floor(fy);
@@ -61,22 +87,23 @@ namespace FluidSimulation
                 float tx = fx - i0;
                 float ty = fy - j0;
 
-                // 双线性插值权重散布
-                for (int di = 0; di <= 1; ++di)
+                glm::vec3 wx = bspline2(tx);
+                glm::vec3 wy = bspline2(ty);
+
+                // 覆盖 i0-1..i0+1, j0-1..j0+1
+                for (int dj = -1; dj <= 1; ++dj)
                 {
-                    for (int dj = 0; dj <= 1; ++dj)
+                    int j = j0 + dj;
+                    if (j < 0 || j >= gridResY) continue;
+                    float wj = wy[dj + 1];
+                    for (int di = -1; di <= 1; ++di)
                     {
                         int i = i0 + di;
-                        int j = j0 + dj;
+                        if (i < 0 || i >= gridResX) continue;
+                        float wi = wx[di + 1];
+                        float w = wi * wj;
 
-                        if (i < 0 || i >= gridResX || j < 0 || j >= gridResY)
-                            continue;
-
-                        float wx = di ? tx : (1.0f - tx);
-                        float wy = dj ? ty : (1.0f - ty);
-                        float w = wx * wy;
-
-                        densityData[j * gridResX + i] += w * 0.5f;  // 每个粒子贡献的密度
+                        densityData[j * gridResX + i] += w * densityPerParticle;
                     }
                 }
             }
@@ -84,8 +111,9 @@ namespace FluidSimulation
             // 限制密度范围并应用平滑
             for (auto &d : densityData)
             {
-                // d = std::min(d, 1.0f);
-                if (d > 1.0f) d = 1.0f;
+                // 保留一定动态范围，把“映射/对比度”交给 shader 做（指数吸收更自然）
+                if (d < 0.0f) d = 0.0f;
+                if (d > 10.0f) d = 10.0f;
             }
 
             // 上传到纹理
