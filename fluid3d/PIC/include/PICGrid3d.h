@@ -26,7 +26,23 @@ namespace FluidSimulation
         class PICGrid3d : public Eulerian3d::MACGrid3d
         {
         public:
-            PICGrid3d() : Eulerian3d::MACGrid3d() {}
+            PICGrid3d();
+
+            // 重新初始化（隐藏基类版本），确保使用 PIC3d 的场景固体
+            void initialize();
+
+            // 生成固体（隐藏基类版本）：中心球体障碍
+            void createSolids();
+
+            // 固体面判定（隐藏基类版本）：右侧 X 边界为出流
+            int isSolidFace(int i, int j, int k, Direction d);
+
+            // 中心球体 SDF/碰撞辅助
+            bool inSphere(const glm::vec3 &pt) const;
+            glm::vec3 sphereNormal(const glm::vec3 &pt) const;
+            glm::vec3 projectOutOfSphere(const glm::vec3 &pt, float extra = 0.0f) const;
+            const glm::vec3 &sphereCenter() const { return mSphereCenter; }
+            float sphereRadius() const { return mSphereRadius; }
 
             /**
              * 从指定的速度网格插值获取速度
@@ -41,6 +57,12 @@ namespace FluidSimulation
                                           Glb::GridData3dX &uGrid,
                                           Glb::GridData3dY &vGrid,
                                           Glb::GridData3dZ &wGrid);
+
+        private:
+            glm::vec3 mSphereCenter{0.0f};
+            float mSphereRadius = 0.0f;
+
+            float sphereSDF(const glm::vec3 &pt) const;
         };
 
 /** 遍历所有网格单元的宏 */

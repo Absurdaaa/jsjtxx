@@ -72,9 +72,9 @@ namespace Glb {
 
         float_t mSensitiveYaw = 0.1;                        //相机偏航角灵敏度
         float_t mSensitivePitch = 0.1;                      //相机偏航角灵敏度
-        float_t mSensitiveX = 0.001;                        //相机移动灵敏度
-        float_t mSensitiveY = 0.001;                        //相机移动灵敏度
-        float_t mSensitiveFront = 0.05;                     //相机缩放灵敏度
+        float_t mSensitiveX = 0.01;                        //相机移动灵敏度
+        float_t mSensitiveY = 0.01;                        //相机移动灵敏度
+        float_t mSensitiveFront = 0.1;                     //相机缩放灵敏度
 
         glm::vec3 mPosition;                                //相机位置
         

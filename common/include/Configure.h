@@ -208,6 +208,9 @@ namespace PIC3dPara
     // 压力投影迭代次数（Gauss-Seidel）。数值越大越接近无散度，但更慢。
     extern int pressureIters;
 
+    // 场景：中心球体障碍半径（以 cell 为单位）。修改后需要 Rerun 生效。
+    extern float sphereRadiusCells;
+
   extern int particlesPerStep;
   extern float emissionJitter;
   extern float wallRestitution;

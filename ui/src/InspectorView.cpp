@@ -4,6 +4,7 @@
  */
 
 #include "InspectorView.h"
+#include "Camera.h"
 
 namespace FluidSimulation
 {
@@ -506,10 +507,29 @@ namespace FluidSimulation
 			case 6:
 				// PIC 3d
 				ImGui::Text("PIC 3d:");
+				ImGui::Text("Camera:");
+				ImGui::InputFloat3("Position", &Glb::Camera::getInstance().mPosition.x);
+				ImGui::InputScalar("Fov", ImGuiDataType_Float, &Glb::Camera::getInstance().fovyDeg, &floatStep1, NULL);
+				ImGui::InputScalar("Aspect", ImGuiDataType_Float, &Glb::Camera::getInstance().aspect, &floatStep1, NULL);
+				ImGui::InputScalar("Near", ImGuiDataType_Float, &Glb::Camera::getInstance().nearPlane, &floatStep1, NULL);
+				ImGui::InputScalar("Far", ImGuiDataType_Float, &Glb::Camera::getInstance().farPlane, &floatStep1, NULL);
+				ImGui::InputScalar("Yaw", ImGuiDataType_Float, &Glb::Camera::getInstance().mYaw, &floatStep1, NULL);
+				ImGui::InputScalar("Pitch", ImGuiDataType_Float, &Glb::Camera::getInstance().mPitch, &floatStep1, NULL);
+				Glb::Camera::getInstance().UpdateView();
+
+				ImGui::Separator();
+
 				ImGui::SliderFloat("Delta Time", &PIC3dPara::dt, 0.0001f, 0.1f, "%.5f");
 				ImGui::InputInt("Particles / Source / Step", &PIC3dPara::particlesPerStep);
 				ImGui::SliderFloat("Emission Jitter (cell)", &PIC3dPara::emissionJitter, 0.0f, 1.0f);
 				ImGui::InputInt("Emitter Radius (cells)", &PIC3dPara::emitterRadius);
+				{
+					int minDim3 = Eulerian3dPara::theDim3d[0];
+					if (Eulerian3dPara::theDim3d[1] < minDim3) minDim3 = Eulerian3dPara::theDim3d[1];
+					if (Eulerian3dPara::theDim3d[2] < minDim3) minDim3 = Eulerian3dPara::theDim3d[2];
+					float maxR = 0.49f * (float)minDim3;
+					ImGui::SliderFloat("Sphere Radius (cells)", &PIC3dPara::sphereRadiusCells, 0.0f, maxR, "%.2f");
+				}
 				ImGui::SliderFloat("Wall Restitution", &PIC3dPara::wallRestitution, 0.0f, 1.0f);
 				ImGui::InputInt("Pressure Iters", &PIC3dPara::pressureIters);
 				ImGui::Separator();

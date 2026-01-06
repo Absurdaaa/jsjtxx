@@ -241,7 +241,6 @@ namespace FluidSimulation
                 for (int j = 0; j < ny; ++j)
                 {
                     mGrid.mU(0, j, k) = 0.0;
-                    mGrid.mU(nx, j, k) = 0.0;
                 }
             for (int k = 0; k < nz; ++k)
                 for (int i = 0; i < nx; ++i)
@@ -353,6 +352,11 @@ namespace FluidSimulation
                     for (int i = 0; i < nx; ++i)
                         if (!mGrid.isSolidCell(i, j, k - 1) && !mGrid.isSolidCell(i, j, k))
                             mGrid.mW(i, j, k) -= scale * ((float)p(i, j, k) - (float)p(i, j, k - 1)) * h;
+
+            // 5) 出流边界（x = nx*h）：对 u 施加零法向梯度（简单拷贝）
+            for (int k = 0; k < nz; ++k)
+                for (int j = 0; j < ny; ++j)
+                    mGrid.mU(nx, j, k) = mGrid.mU(nx - 1, j, k);
         }
 
         /**
@@ -394,33 +398,37 @@ namespace FluidSimulation
           const int nz = mGrid.dim[PICGrid3d::Z];
           const float eps = h * 0.01f; // 边界偏移量
           const glm::vec3 minP(eps), maxP(nx * h - eps, ny * h - eps, nz * h - eps);
+          const float outflowX = nx * h; // 右侧出流平面
 
           const float restitution = PIC3dPara::wallRestitution; // 反弹系数
           const float friction = 0.9f;                          // 切向摩擦保留
 
-          for (auto &p : mPs.particles)
+                    for (auto &p : mPs.particles)
           {
+                        bool alive = true;
+
             // 计算需要的子步数：确保每步移动不超过半个格子
             float dist = glm::length(p.velocity) * (float)dt;
             int numSubsteps = dist < h * 0.5f ? 1 : (int)std::ceil(dist / (h * 0.5f));
             float subDt = (float)dt / numSubsteps;
 
-            for (int s = 0; s < numSubsteps; ++s)
+                        for (int s = 0; s < numSubsteps; ++s)
             {
               glm::vec3 oldPos = p.position;
               p.position += subDt * p.velocity;
 
-              // 域边界碰撞（带反弹）
+                            // 域边界碰撞（带反弹）
               if (p.position.x < minP.x)
               {
                 p.position.x = minP.x;
                 p.velocity.x *= -restitution;
               }
-              if (p.position.x > maxP.x)
-              {
-                p.position.x = maxP.x;
-                p.velocity.x *= -restitution;
-              }
+                            // 右侧为出流：超过出流面则直接移除粒子
+                            if (p.position.x >= outflowX)
+                            {
+                                alive = false;
+                                break;
+                            }
               if (p.position.y < minP.y)
               {
                 p.position.y = minP.y;
@@ -442,33 +450,23 @@ namespace FluidSimulation
                 p.velocity.z *= -restitution;
               }
 
-              // 固体碰撞检测
-              int ci, cj, ck;
-              if (mGrid.inSolid(p.position, ci, cj, ck))
-              {
-                // 计算碰撞法线（从旧位置指向固体中心的反方向）
-                glm::vec3 solidCenter = mGrid.getCenter(ci, cj, ck);
-                glm::vec3 normal = glm::normalize(oldPos - solidCenter);
+                            // 中心球体碰撞（SDF 法线，更圆）
+                            if (Eulerian3dPara::addSolid && mGrid.inSphere(p.position))
+                            {
+                                glm::vec3 n = mGrid.sphereNormal(p.position);
+                                float vn = glm::dot(p.velocity, n);
+                                glm::vec3 vN = vn * n;
+                                glm::vec3 vT = p.velocity - vN;
 
-                // 分解速度为法向和切向
-                float vn = glm::dot(p.velocity, normal);
-                glm::vec3 vNormal = vn * normal;
-                glm::vec3 vTangent = p.velocity - vNormal;
+                                if (vn < 0.0f)
+                                    p.velocity = -restitution * vN + friction * vT;
 
-                // 反弹：法向反转并衰减，切向保留（带摩擦）
-                if (vn < 0) // 只有朝向固体时才反弹
-                  p.velocity = -restitution * vNormal + friction * vTangent;
-
-                // 将粒子推回到固体外
-                p.position = oldPos;
-              }
+                                p.position = mGrid.projectOutOfSphere(p.position, eps);
+                            }
             }
 
-            // 如果粒子到达右边界（出口），则不加入 survivors，表示消失
-            if (p.position.x >= maxP.x - 1e-6f)
-            {
-              continue; // particle disappears
-            }
+                        if (!alive)
+                            continue;
 
             survivors.push_back(p);
           }

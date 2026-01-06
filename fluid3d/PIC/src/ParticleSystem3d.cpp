@@ -21,42 +21,51 @@ namespace FluidSimulation
         {
             // 使用固定种子的随机数生成器，保证可重复性
             static std::mt19937 rng(42);
-            std::uniform_real_distribution<float> uni(-0.5f, 0.5f);
+            std::uniform_real_distribution<float> uni{-0.5f, 0.5f};
 
             const float h = PIC3dPara::theCellSize3d;        // 网格单元大小
             const int emitN = PIC3dPara::particlesPerStep;        // 每步发射粒子数
             const float jitter = PIC3dPara::emissionJitter * h;   // 发射抖动范围
-            const int radius = PIC3dPara::emitterRadius;         // 发射源半径（格子数）
-            std::uniform_int_distribution<int> idist(radius > 0 ? -radius : 0, radius > 0 ? radius : 0);
+            const int radius = PIC3dPara::emitterRadius;         // 喷口半径（格子数）：圆盘半径
+            std::uniform_int_distribution<int> idist{radius > 0 ? -radius : 0, radius > 0 ? radius : 0};
 
             // 遍历所有烟雾源
             for (const auto &src : PIC3dPara::source)
             {
-                // 发射指定数量的粒子，发射源可为球体（以格子为单位的半径）
+                // 发射指定数量的粒子：面上的圆形喷口（在 y-z 平面内为圆盘）
                 for (int n = 0; n < emitN; ++n)
                 {
-                    int dx = idist(rng);
-                    int dy = idist(rng);
-                    int dz = idist(rng);
+                    // 固定在一个面附近：x 方向只给一个很薄的厚度（默认 0）
+                    const int cellX = src.position.x;
 
-                    // 若使用球形发射区，需要满足 dx^2+dy^2+dz^2 <= radius^2
-                    if (radius > 0 && (dx * dx + dy * dy + dz * dz > radius * radius))
+                    int cellY = src.position.y;
+                    int cellZ = src.position.z;
+
+                    // 在 y-z 平面做圆盘采样；越界就重采样，避免 clamp 带来的偏置
+                    if (radius > 0)
                     {
-                        // 若不满足，重试一次（简单策略），否则退回到中心
-                        dx = 0; dy = 0; dz = 0;
+                        bool ok = false;
+                        for (int tries = 0; tries < 16 && !ok; ++tries)
+                        {
+                            int dy = idist(rng);
+                            int dz = idist(rng);
+                            if (dy * dy + dz * dz > radius * radius)
+                                continue;
+
+                            int y = src.position.y + dy;
+                            int z = src.position.z + dz;
+                            if (y < 0 || y >= PIC3dPara::theDim3d[1] || z < 0 || z >= PIC3dPara::theDim3d[2])
+                                continue;
+
+                            cellY = y;
+                            cellZ = z;
+                            ok = true;
+                        }
                     }
 
-                    int cellX = src.position.x + dx;
-                    int cellY = src.position.y + dy;
-                    int cellZ = src.position.z + dz;
-
-                    // clamp 到网格范围
-                    cellX = cellX < PIC3dPara::theDim3d[0] ? cellX : PIC3dPara::theDim3d[0] - 1;
-                    cellX = cellX > 0 ? cellX : 0;
-                    cellY = cellY < PIC3dPara::theDim3d[1] ? cellY : PIC3dPara::theDim3d[1] - 1;
-                    cellY = cellY > 0 ? cellY : 0;
-                    cellZ = cellZ < PIC3dPara::theDim3d[2] ? cellZ : PIC3dPara::theDim3d[2] - 1;
-                    cellZ = cellZ > 0 ? cellZ : 0;
+                    // 兜底：确保合法
+                    cellY = (cellY < 0) ? 0 : (cellY >= PIC3dPara::theDim3d[1] ? PIC3dPara::theDim3d[1] - 1 : cellY);
+                    cellZ = (cellZ < 0) ? 0 : (cellZ >= PIC3dPara::theDim3d[2] ? PIC3dPara::theDim3d[2] - 1 : cellZ);
 
                     float baseX = (cellX + 0.5f) * h;
                     float baseY = (cellY + 0.5f) * h;

@@ -153,6 +153,9 @@ namespace PIC3dPara
   float boussinesqBeta = 2500.0; // Boussinesq����ʽ�е�beta����
     int pressureIters = 50;        // Default value for pressure iterations
 
+        // 场景：中心球体半径（cell）。0 表示关闭障碍。
+        float sphereRadiusCells = 6.5f;
+
     int particlesPerStep = 100;
   float emissionJitter = 0.3f;
   float wallRestitution = 0.1f;
