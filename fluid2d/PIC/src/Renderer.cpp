@@ -74,7 +74,7 @@ namespace FluidSimulation
 
             // 将每个粒子的贡献散布到周围网格
             // 这相当于“每粒子密度质量”；太大容易整屏发白，太小则看不见。
-            const float densityPerParticle = 0.15f;
+            const float densityPerParticle = 2.5f;
             for (const auto &p : ps.particles)
             {
                 // 计算粒子在网格中的位置
@@ -91,15 +91,16 @@ namespace FluidSimulation
                 glm::vec3 wy = bspline2(ty);
 
                 // 覆盖 i0-1..i0+1, j0-1..j0+1
+                // 边界处理：clamp 索引而不是跳过，避免权重丢失
                 for (int dj = -1; dj <= 1; ++dj)
                 {
                     int j = j0 + dj;
-                    if (j < 0 || j >= gridResY) continue;
+                    j = j < 0 ? 0 : (j >= gridResY ? gridResY - 1 : j);
                     float wj = wy[dj + 1];
                     for (int di = -1; di <= 1; ++di)
                     {
                         int i = i0 + di;
-                        if (i < 0 || i >= gridResX) continue;
+                        i = i < 0 ? 0 : (i >= gridResX ? gridResX - 1 : i);
                         float wi = wx[di + 1];
                         float w = wi * wj;
 

@@ -29,6 +29,9 @@ namespace FluidSimulation
       // 4. P2G: 粒子速度转移到网格
       particleToGrid();
 
+      // 4.5 重新设置源速度（P2G会清零速度场）
+      mGrid.updateSources();
+
       // 5. 保存旧速度（用于FLIP）
       mU_prev = mGrid.mU;
       mV_prev = mGrid.mV;
