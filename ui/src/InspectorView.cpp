@@ -304,7 +304,7 @@ namespace FluidSimulation
 				ImGui::SliderFloat("Emission Jitter (cell)", &PIC2dPara::emissionJitter, 0.0f, 1.0f);
 				ImGui::InputInt("Emitter Radius (cells)", &PIC2dPara::emitterRadius);
 				ImGui::SliderFloat("Wall Restitution", &PIC2dPara::wallRestitution, 0.0f, 1.0f);
-				ImGui::SliderFloat("Wind X (accel)", &PIC2dPara::windX, -50.0f, 50.0f, "%.3f");
+				ImGui::SliderFloat("Wind X (accel)", &PIC2dPara::windX, -100000.0f, 100000.0f, "%.3f");
 				ImGui::Separator();
 				ImGui::Text("MAC grid:");
 				ImGui::PushItemWidth(150);

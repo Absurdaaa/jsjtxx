@@ -176,7 +176,7 @@ namespace FluidSimulation
 
       // wind
       // windX > 0: 向右；windX < 0: 向左
-      double windX = 5000;
+      double windX = PIC2dPara::windX;
       for (int j = 0; j < ny; ++j)
         for (int i = 1; i < nx; ++i) // U 通常 i=0 和 i=nx 是边界面
           mGrid.mU(i, j) += dt * windX;
