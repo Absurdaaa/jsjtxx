@@ -151,8 +151,9 @@ namespace PIC3dPara
   float ambientTemp = 0.0;       // �����¶�
   float boussinesqAlpha = 500.0; // Boussinesq����ʽ�е�alpha����
   float boussinesqBeta = 2500.0; // Boussinesq����ʽ�е�beta����
+    int pressureIters = 50;        // Default value for pressure iterations
 
-  int particlesPerStep = 100;
+    int particlesPerStep = 100;
   float emissionJitter = 0.3f;
   float wallRestitution = 0.1f;
   int emitterRadius = 5;

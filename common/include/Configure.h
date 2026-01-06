@@ -205,6 +205,9 @@ namespace PIC3dPara
   extern float boussinesqBeta;
   extern float vorticityConst;
 
+    // 压力投影迭代次数（Gauss-Seidel）。数值越大越接近无散度，但更慢。
+    extern int pressureIters;
+
   extern int particlesPerStep;
   extern float emissionJitter;
   extern float wallRestitution;

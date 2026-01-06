@@ -437,3 +437,9 @@ gridResY = simNy * renderScale;
 
 - `windX > 0` 表示向右吹；`windX < 0` 表示向左吹。
 - 风是在投影前添加，因此不会破坏不可压缩约束。
+
+---
+
+## 7) 3D PIC 文档位置
+
+3D PIC 的不可压缩投影（压力泊松 + 投影）已整理到单独文档：`PIC3D_Incompressible.md`。

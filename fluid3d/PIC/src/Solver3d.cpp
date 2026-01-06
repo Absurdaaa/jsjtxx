@@ -269,18 +269,26 @@ namespace FluidSimulation
             const float h = mGrid.cellSize;
             const float scale = dt / (PIC3dPara::airDensity * h * h);
 
-            // 将固体边界的法向速度设为 0
+            // 1) 固体面法向速度清零（含容器边界面）
             for (int k = 0; k < nz; ++k)
                 for (int j = 0; j < ny; ++j)
-                    for (int i = 0; i < nx; ++i)
-                        if (mGrid.isSolidCell(i, j, k))
-                        {
-                            mGrid.mU(i, j, k) = mGrid.mU(i + 1, j, k) = 0;
-                            mGrid.mV(i, j, k) = mGrid.mV(i, j + 1, k) = 0;
-                            mGrid.mW(i, j, k) = mGrid.mW(i, j, k + 1) = 0;
-                        }
+                    for (int i = 0; i <= nx; ++i)
+                        if (mGrid.isSolidFace(i, j, k, PICGrid3d::X))
+                            mGrid.mU(i, j, k) = 0.0;
 
-            // 计算散度
+            for (int k = 0; k < nz; ++k)
+                for (int j = 0; j <= ny; ++j)
+                    for (int i = 0; i < nx; ++i)
+                        if (mGrid.isSolidFace(i, j, k, PICGrid3d::Y))
+                            mGrid.mV(i, j, k) = 0.0;
+
+            for (int k = 0; k <= nz; ++k)
+                for (int j = 0; j < ny; ++j)
+                    for (int i = 0; i < nx; ++i)
+                        if (mGrid.isSolidFace(i, j, k, PICGrid3d::Z))
+                            mGrid.mW(i, j, k) = 0.0;
+
+            // 2) 计算散度（基于 solid face 判定，避免 “solid cell 邻居” 导致的不一致）
             Glb::GridData3d div;
             div.initialize(0.0);
 
@@ -288,57 +296,63 @@ namespace FluidSimulation
                 for (int j = 0; j < ny; ++j)
                     for (int i = 0; i < nx; ++i)
                     {
-                        if (mGrid.isSolidCell(i, j, k)) continue;
-                        // 处理固体边界
-                        float uR = mGrid.isSolidCell(i + 1, j, k) ? 0 : mGrid.mU(i + 1, j, k);
-                        float uL = mGrid.isSolidCell(i - 1, j, k) ? 0 : mGrid.mU(i, j, k);
-                        float vT = mGrid.isSolidCell(i, j + 1, k) ? 0 : mGrid.mV(i, j + 1, k);
-                        float vB = mGrid.isSolidCell(i, j - 1, k) ? 0 : mGrid.mV(i, j, k);
-                        float wF = mGrid.isSolidCell(i, j, k + 1) ? 0 : mGrid.mW(i, j, k + 1);
-                        float wK = mGrid.isSolidCell(i, j, k - 1) ? 0 : mGrid.mW(i, j, k);
+                        if (mGrid.isSolidCell(i, j, k))
+                            continue;
+
+                        const float uR = mGrid.isSolidFace(i + 1, j, k, PICGrid3d::X) ? 0.0f : (float)mGrid.mU(i + 1, j, k);
+                        const float uL = mGrid.isSolidFace(i, j, k, PICGrid3d::X) ? 0.0f : (float)mGrid.mU(i, j, k);
+                        const float vT = mGrid.isSolidFace(i, j + 1, k, PICGrid3d::Y) ? 0.0f : (float)mGrid.mV(i, j + 1, k);
+                        const float vB = mGrid.isSolidFace(i, j, k, PICGrid3d::Y) ? 0.0f : (float)mGrid.mV(i, j, k);
+                        const float wF = mGrid.isSolidFace(i, j, k + 1, PICGrid3d::Z) ? 0.0f : (float)mGrid.mW(i, j, k + 1);
+                        const float wK = mGrid.isSolidFace(i, j, k, PICGrid3d::Z) ? 0.0f : (float)mGrid.mW(i, j, k);
+
                         div(i, j, k) = (uR - uL + vT - vB + wF - wK) / h;
                     }
 
-            // Gauss-Seidel 迭代求解压力
+            // 3) Gauss-Seidel 迭代求解压力
             Glb::GridData3d p;
             p.initialize(0.0);
 
-            for (int iter = 0; iter < 50; ++iter)
+            const int iters = (PIC3dPara::pressureIters > 0) ? PIC3dPara::pressureIters : 0;
+            for (int iter = 0; iter < iters; ++iter)
                 for (int k = 0; k < nz; ++k)
                     for (int j = 0; j < ny; ++j)
                         for (int i = 0; i < nx; ++i)
                         {
-                            if (mGrid.isSolidCell(i, j, k)) continue;
-                            // 统计流体邻居数量和压力和
+                            if (mGrid.isSolidCell(i, j, k))
+                                continue;
+
                             int n = 0;
                             float pSum = 0.0f;
-                            if (i > 0 && !mGrid.isSolidCell(i - 1, j, k)) { pSum += p(i - 1, j, k); n++; }
-                            if (i < nx - 1 && !mGrid.isSolidCell(i + 1, j, k)) { pSum += p(i + 1, j, k); n++; }
-                            if (j > 0 && !mGrid.isSolidCell(i, j - 1, k)) { pSum += p(i, j - 1, k); n++; }
-                            if (j < ny - 1 && !mGrid.isSolidCell(i, j + 1, k)) { pSum += p(i, j + 1, k); n++; }
-                            if (k > 0 && !mGrid.isSolidCell(i, j, k - 1)) { pSum += p(i, j, k - 1); n++; }
-                            if (k < nz - 1 && !mGrid.isSolidCell(i, j, k + 1)) { pSum += p(i, j, k + 1); n++; }
-                            if (n > 0) p(i, j, k) = (pSum - div(i, j, k) / scale) / n;
+                            if (i > 0 && !mGrid.isSolidCell(i - 1, j, k)) { pSum += (float)p(i - 1, j, k); ++n; }
+                            if (i < nx - 1 && !mGrid.isSolidCell(i + 1, j, k)) { pSum += (float)p(i + 1, j, k); ++n; }
+                            if (j > 0 && !mGrid.isSolidCell(i, j - 1, k)) { pSum += (float)p(i, j - 1, k); ++n; }
+                            if (j < ny - 1 && !mGrid.isSolidCell(i, j + 1, k)) { pSum += (float)p(i, j + 1, k); ++n; }
+                            if (k > 0 && !mGrid.isSolidCell(i, j, k - 1)) { pSum += (float)p(i, j, k - 1); ++n; }
+                            if (k < nz - 1 && !mGrid.isSolidCell(i, j, k + 1)) { pSum += (float)p(i, j, k + 1); ++n; }
+
+                            if (n > 0)
+                                p(i, j, k) = (pSum - (float)div(i, j, k) / scale) / (float)n;
                         }
 
-            // 应用压力梯度（只在两侧都是流体时）
+            // 4) 应用压力梯度到面速度（仅当面两侧都是流体 cell 时）
             for (int k = 0; k < nz; ++k)
                 for (int j = 0; j < ny; ++j)
                     for (int i = 1; i < nx; ++i)
                         if (!mGrid.isSolidCell(i - 1, j, k) && !mGrid.isSolidCell(i, j, k))
-                            mGrid.mU(i, j, k) -= scale * (p(i, j, k) - p(i - 1, j, k)) * h;
+                            mGrid.mU(i, j, k) -= scale * ((float)p(i, j, k) - (float)p(i - 1, j, k)) * h;
 
             for (int k = 0; k < nz; ++k)
                 for (int j = 1; j < ny; ++j)
                     for (int i = 0; i < nx; ++i)
                         if (!mGrid.isSolidCell(i, j - 1, k) && !mGrid.isSolidCell(i, j, k))
-                            mGrid.mV(i, j, k) -= scale * (p(i, j, k) - p(i, j - 1, k)) * h;
+                            mGrid.mV(i, j, k) -= scale * ((float)p(i, j, k) - (float)p(i, j - 1, k)) * h;
 
             for (int k = 1; k < nz; ++k)
                 for (int j = 0; j < ny; ++j)
                     for (int i = 0; i < nx; ++i)
                         if (!mGrid.isSolidCell(i, j, k - 1) && !mGrid.isSolidCell(i, j, k))
-                            mGrid.mW(i, j, k) -= scale * (p(i, j, k) - p(i, j, k - 1)) * h;
+                            mGrid.mW(i, j, k) -= scale * ((float)p(i, j, k) - (float)p(i, j, k - 1)) * h;
         }
 
         /**

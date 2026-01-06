@@ -506,11 +506,12 @@ namespace FluidSimulation
 			case 6:
 				// PIC 3d
 				ImGui::Text("PIC 3d:");
-				ImGui::SliderFloat("Delta Time", &Eulerian3dPara::dt, 0.0001f, 0.1f, "%.5f");
+				ImGui::SliderFloat("Delta Time", &PIC3dPara::dt, 0.0001f, 0.1f, "%.5f");
 				ImGui::InputInt("Particles / Source / Step", &PIC3dPara::particlesPerStep);
 				ImGui::SliderFloat("Emission Jitter (cell)", &PIC3dPara::emissionJitter, 0.0f, 1.0f);
 				ImGui::InputInt("Emitter Radius (cells)", &PIC3dPara::emitterRadius);
 				ImGui::SliderFloat("Wall Restitution", &PIC3dPara::wallRestitution, 0.0f, 1.0f);
+				ImGui::InputInt("Pressure Iters", &PIC3dPara::pressureIters);
 				ImGui::Separator();
 				ImGui::Text("MAC grid:");
 				ImGui::PushItemWidth(150);
