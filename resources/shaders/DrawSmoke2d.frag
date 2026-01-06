@@ -70,7 +70,7 @@ void main()
     float dVis = 1.0 - exp(-k * d);
 
     // 指数吸收：alpha 用 dVis 驱动会更稳定（避免 d 稍大就几乎全白）
-    const float sigma = 1.0;
+    const float sigma = 5.0;
     float alpha = 1.0 - exp(-sigma * dVis);
 
     // 轻微抖动：减少banding（幅度很小，基本看不见噪点）

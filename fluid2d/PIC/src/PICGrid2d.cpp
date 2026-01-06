@@ -114,14 +114,26 @@ namespace FluidSimulation
         // 根据源参数更新温度/密度/速度
         void PICGrid2d::updateSources()
         {
+            const int radius = PIC2dPara::emitterRadius;
             for (int i = 0; i < PIC2dPara::source.size(); i++)
             {
-                int x = PIC2dPara::source[i].position.x;
-                int y = PIC2dPara::source[i].position.y;
-                mT(x, y) = PIC2dPara::source[i].temp;         // 源温度
-                mD(x, y) = PIC2dPara::source[i].density;      // 源密度
-                mU(x, y) = PIC2dPara::source[i].velocity.x;   // 源X速度
-                mV(x, y) = PIC2dPara::source[i].velocity.y;   // 源Y速度
+                int cx = PIC2dPara::source[i].position.x;
+                int cy = PIC2dPara::source[i].position.y;
+                // 覆盖 emitterRadius 范围内的所有格子
+                for (int dx = -radius; dx <= radius; ++dx)
+                {
+                    for (int dy = -radius; dy <= radius; ++dy)
+                    {
+                        int x = cx + dx;
+                        int y = cy + dy;
+                        if (x < 0 || x >= dim[X] || y < 0 || y >= dim[Y])
+                            continue;
+                        mT(x, y) = PIC2dPara::source[i].temp;
+                        mD(x, y) = PIC2dPara::source[i].density;
+                        mU(x, y) = PIC2dPara::source[i].velocity.x;
+                        mV(x, y) = PIC2dPara::source[i].velocity.y;
+                    }
+                }
             }
         }
 
