@@ -174,17 +174,12 @@ namespace FluidSimulation
       const int ny = mGrid.dim[PICGrid2d::Y];
       const float h = mGrid.cellSize;
 
-      // 只添加浮力（烟雾模拟）
-      // for (int j = 1; j < ny; ++j)  // 跳过边界
-      // {
-      //   for (int i = 0; i < nx; ++i)
-      //   {
-      //     glm::vec2 pos((i + 0.5f) * h, j * h);
-      //     double buoy = mGrid.getBoussinesqForce(pos);
-      //     mGrid.mV(i, j) += dt * buoy;
-      //   }
-      // }
-      
+      // wind
+      // windX > 0: 向右；windX < 0: 向左
+      double windX = 5000;
+      for (int j = 0; j < ny; ++j)
+        for (int i = 1; i < nx; ++i) // U 通常 i=0 和 i=nx 是边界面
+          mGrid.mU(i, j) += dt * windX;
 
       // 边界速度：左/上/下是墙；右侧是出口（不再把右边界 u 设为 0）
       for (int i = 0; i < nx; ++i)
