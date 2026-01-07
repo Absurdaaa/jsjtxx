@@ -47,6 +47,7 @@ namespace FluidSimulation
 
             void particleToGrid();           // P2G：粒子速度转移到网格
             void addForces(double dt);       // 添加外力（浮力）
+            void applyVorticityConfinement(double dt); // 涡量增强（Vorticity Confinement）
             void advectScalars(double dt);   // 平流温度和密度场
             void pressureProjection(double dt);  // 压力投影（保证不可压缩）
             void gridToParticle(double dt);  // G2P：网格速度转移回粒子

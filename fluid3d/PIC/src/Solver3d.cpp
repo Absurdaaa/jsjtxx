@@ -4,7 +4,9 @@
  */
 
 #include "PIC/include/Solver3d.h"
+#include "../../../common/include/GridData3d.h"
 #include <cmath>
+#include <vector>
 
 namespace FluidSimulation
 {
@@ -55,6 +57,10 @@ namespace FluidSimulation
             // 6. 添加外力（浮力）
             addForces(dt);
 
+            // 6.5 涡量增强（可选，vorticityConst=0 时不生效）
+            if (PIC3dPara::vorticityConst > 0.0f)
+                applyVorticityConfinement(dt);
+
             // 7. 压力投影（保证不可压缩）
             pressureProjection(dt);
 
@@ -63,6 +69,202 @@ namespace FluidSimulation
 
             // 9. 移动粒子
             advectParticles(dt);
+        }
+
+        // ==================== 涡量增强（Vorticity Confinement, 3D） ====================
+        void Solver3d::applyVorticityConfinement(double dt)
+        {
+            const int nx = mGrid.dim[PICGrid3d::X];
+            const int ny = mGrid.dim[PICGrid3d::Y];
+            const int nz = mGrid.dim[PICGrid3d::Z];
+            const float h = mGrid.cellSize;
+            const float eps = PIC3dPara::vorticityConst;
+            if (eps <= 0.0f || nx <= 1 || ny <= 1 || nz <= 1)
+                return;
+
+            auto idx = [nx, ny](int i, int j, int k) -> int { return i + j * nx + k * nx * ny; };
+
+            // cell-centered velocities
+            std::vector<float> uC((size_t)nx * (size_t)ny * (size_t)nz, 0.0f);
+            std::vector<float> vC((size_t)nx * (size_t)ny * (size_t)nz, 0.0f);
+            std::vector<float> wC((size_t)nx * (size_t)ny * (size_t)nz, 0.0f);
+
+            auto uCenter = [&](int i, int j, int k) -> float {
+                float uL = mGrid.isSolidFace(i, j, k, PICGrid3d::X) ? 0.0f : (float)mGrid.mU(i, j, k);
+                float uR = mGrid.isSolidFace(i + 1, j, k, PICGrid3d::X) ? 0.0f : (float)mGrid.mU(i + 1, j, k);
+                return 0.5f * (uL + uR);
+            };
+            auto vCenter = [&](int i, int j, int k) -> float {
+                float vB = mGrid.isSolidFace(i, j, k, PICGrid3d::Y) ? 0.0f : (float)mGrid.mV(i, j, k);
+                float vT = mGrid.isSolidFace(i, j + 1, k, PICGrid3d::Y) ? 0.0f : (float)mGrid.mV(i, j + 1, k);
+                return 0.5f * (vB + vT);
+            };
+            auto wCenter = [&](int i, int j, int k) -> float {
+                float wK = mGrid.isSolidFace(i, j, k, PICGrid3d::Z) ? 0.0f : (float)mGrid.mW(i, j, k);
+                float wF = mGrid.isSolidFace(i, j, k + 1, PICGrid3d::Z) ? 0.0f : (float)mGrid.mW(i, j, k + 1);
+                return 0.5f * (wK + wF);
+            };
+
+            for (int k = 0; k < nz; ++k)
+                for (int j = 0; j < ny; ++j)
+                    for (int i = 0; i < nx; ++i)
+                    {
+                        if (mGrid.isSolidCell(i, j, k))
+                            continue;
+                        uC[idx(i, j, k)] = uCenter(i, j, k);
+                        vC[idx(i, j, k)] = vCenter(i, j, k);
+                        wC[idx(i, j, k)] = wCenter(i, j, k);
+                    }
+
+            // curl ω and |ω|
+            std::vector<float> wx((size_t)nx * (size_t)ny * (size_t)nz, 0.0f);
+            std::vector<float> wy((size_t)nx * (size_t)ny * (size_t)nz, 0.0f);
+            std::vector<float> wz((size_t)nx * (size_t)ny * (size_t)nz, 0.0f);
+            std::vector<float> mag((size_t)nx * (size_t)ny * (size_t)nz, 0.0f);
+
+            auto sample = [&](const std::vector<float> &a, int i, int j, int k) -> float {
+                if (i < 0) i = 0; if (i > nx - 1) i = nx - 1;
+                if (j < 0) j = 0; if (j > ny - 1) j = ny - 1;
+                if (k < 0) k = 0; if (k > nz - 1) k = nz - 1;
+                return a[idx(i, j, k)];
+            };
+
+            for (int k = 0; k < nz; ++k)
+                for (int j = 0; j < ny; ++j)
+                    for (int i = 0; i < nx; ++i)
+                    {
+                        if (mGrid.isSolidCell(i, j, k))
+                            continue;
+
+                        const float dwdy = (j == 0) ? (sample(wC, i, 1, k) - sample(wC, i, 0, k)) / h
+                                                   : (j == ny - 1) ? (sample(wC, i, ny - 1, k) - sample(wC, i, ny - 2, k)) / h
+                                                                  : (sample(wC, i, j + 1, k) - sample(wC, i, j - 1, k)) / (2.0f * h);
+                        const float dvdz = (k == 0) ? (sample(vC, i, j, 1) - sample(vC, i, j, 0)) / h
+                                                   : (k == nz - 1) ? (sample(vC, i, j, nz - 1) - sample(vC, i, j, nz - 2)) / h
+                                                                  : (sample(vC, i, j, k + 1) - sample(vC, i, j, k - 1)) / (2.0f * h);
+
+                        const float dudz = (k == 0) ? (sample(uC, i, j, 1) - sample(uC, i, j, 0)) / h
+                                                   : (k == nz - 1) ? (sample(uC, i, j, nz - 1) - sample(uC, i, j, nz - 2)) / h
+                                                                  : (sample(uC, i, j, k + 1) - sample(uC, i, j, k - 1)) / (2.0f * h);
+                        const float dwdx = (i == 0) ? (sample(wC, 1, j, k) - sample(wC, 0, j, k)) / h
+                                                   : (i == nx - 1) ? (sample(wC, nx - 1, j, k) - sample(wC, nx - 2, j, k)) / h
+                                                                  : (sample(wC, i + 1, j, k) - sample(wC, i - 1, j, k)) / (2.0f * h);
+
+                        const float dvdx = (i == 0) ? (sample(vC, 1, j, k) - sample(vC, 0, j, k)) / h
+                                                   : (i == nx - 1) ? (sample(vC, nx - 1, j, k) - sample(vC, nx - 2, j, k)) / h
+                                                                  : (sample(vC, i + 1, j, k) - sample(vC, i - 1, j, k)) / (2.0f * h);
+                        const float dudy = (j == 0) ? (sample(uC, i, 1, k) - sample(uC, i, 0, k)) / h
+                                                   : (j == ny - 1) ? (sample(uC, i, ny - 1, k) - sample(uC, i, ny - 2, k)) / h
+                                                                  : (sample(uC, i, j + 1, k) - sample(uC, i, j - 1, k)) / (2.0f * h);
+
+                        const float ox = dwdy - dvdz;
+                        const float oy = dudz - dwdx;
+                        const float oz = dvdx - dudy;
+
+                        const int id = idx(i, j, k);
+                        wx[id] = ox;
+                        wy[id] = oy;
+                        wz[id] = oz;
+                        mag[id] = std::sqrt(ox * ox + oy * oy + oz * oz);
+                    }
+
+            // force at cell centers
+            std::vector<float> fx((size_t)nx * (size_t)ny * (size_t)nz, 0.0f);
+            std::vector<float> fy((size_t)nx * (size_t)ny * (size_t)nz, 0.0f);
+            std::vector<float> fz((size_t)nx * (size_t)ny * (size_t)nz, 0.0f);
+
+            auto magAt = [&](int i, int j, int k) -> float {
+                if (i < 0) i = 0; if (i > nx - 1) i = nx - 1;
+                if (j < 0) j = 0; if (j > ny - 1) j = ny - 1;
+                if (k < 0) k = 0; if (k > nz - 1) k = nz - 1;
+                return mag[idx(i, j, k)];
+            };
+
+            for (int k = 0; k < nz; ++k)
+                for (int j = 0; j < ny; ++j)
+                    for (int i = 0; i < nx; ++i)
+                    {
+                        if (mGrid.isSolidCell(i, j, k))
+                            continue;
+
+                        const float dmx = (i == 0) ? (magAt(1, j, k) - magAt(0, j, k)) / h
+                                                 : (i == nx - 1) ? (magAt(nx - 1, j, k) - magAt(nx - 2, j, k)) / h
+                                                                : (magAt(i + 1, j, k) - magAt(i - 1, j, k)) / (2.0f * h);
+                        const float dmy = (j == 0) ? (magAt(i, 1, k) - magAt(i, 0, k)) / h
+                                                 : (j == ny - 1) ? (magAt(i, ny - 1, k) - magAt(i, ny - 2, k)) / h
+                                                                : (magAt(i, j + 1, k) - magAt(i, j - 1, k)) / (2.0f * h);
+                        const float dmz = (k == 0) ? (magAt(i, j, 1) - magAt(i, j, 0)) / h
+                                                 : (k == nz - 1) ? (magAt(i, j, nz - 1) - magAt(i, j, nz - 2)) / h
+                                                                : (magAt(i, j, k + 1) - magAt(i, j, k - 1)) / (2.0f * h);
+
+                        const float len = std::sqrt(dmx * dmx + dmy * dmy + dmz * dmz);
+                        if (len < 1e-8f)
+                            continue;
+
+                        const float Nx = dmx / len;
+                        const float Ny = dmy / len;
+                        const float Nz = dmz / len;
+
+                        const int id = idx(i, j, k);
+                        const float ox = wx[id], oy = wy[id], oz = wz[id];
+
+                        // f = eps * h * (N × ω)
+                        const float cx = Ny * oz - Nz * oy;
+                        const float cy = Nz * ox - Nx * oz;
+                        const float cz = Nx * oy - Ny * ox;
+
+                        fx[id] = eps * h * cx;
+                        fy[id] = eps * h * cy;
+                        fz[id] = eps * h * cz;
+                    }
+
+            // add to staggered velocities by averaging adjacent cell-centered forces
+            auto cellForce = [&](const std::vector<float> &f, int i, int j, int k) -> float {
+                if (i < 0 || i >= nx || j < 0 || j >= ny || k < 0 || k >= nz)
+                    return 0.0f;
+                if (mGrid.isSolidCell(i, j, k))
+                    return 0.0f;
+                return f[idx(i, j, k)];
+            };
+
+            // U faces
+            for (int k = 0; k < nz; ++k)
+                for (int j = 0; j < ny; ++j)
+                    for (int i = 0; i <= nx; ++i)
+                    {
+                        if (mGrid.isSolidFace(i, j, k, PICGrid3d::X))
+                            continue;
+                        float fL = cellForce(fx, i - 1, j, k);
+                        float fR = cellForce(fx, i, j, k);
+                        float fFace = (i == 0) ? fR : (i == nx) ? fL : 0.5f * (fL + fR);
+                        mGrid.mU(i, j, k) += (double)dt * (double)fFace;
+                    }
+
+            // V faces
+            for (int k = 0; k < nz; ++k)
+                for (int j = 0; j <= ny; ++j)
+                    for (int i = 0; i < nx; ++i)
+                    {
+                        if (mGrid.isSolidFace(i, j, k, PICGrid3d::Y))
+                            continue;
+                        float fB = cellForce(fy, i, j - 1, k);
+                        float fT = cellForce(fy, i, j, k);
+                        float fFace = (j == 0) ? fT : (j == ny) ? fB : 0.5f * (fB + fT);
+                        mGrid.mV(i, j, k) += (double)dt * (double)fFace;
+                    }
+
+            // W faces
+            for (int k = 0; k <= nz; ++k)
+                for (int j = 0; j < ny; ++j)
+                    for (int i = 0; i < nx; ++i)
+                    {
+                        if (mGrid.isSolidFace(i, j, k, PICGrid3d::Z))
+                            continue;
+                        float fK = cellForce(fz, i, j, k - 1);
+                        float fF = cellForce(fz, i, j, k);
+                        float fFace = (k == 0) ? fF : (k == nz) ? fK : 0.5f * (fK + fF);
+                        mGrid.mW(i, j, k) += (double)dt * (double)fFace;
+                    }
         }
 
         /**

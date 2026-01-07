@@ -162,7 +162,7 @@ namespace PIC3dPara
   float boussinesqBeta = 2500.0; // Boussinesq����ʽ�е�beta����
 
     // 涡量增强系数（0 表示关闭）
-    float vorticityConst = 0.0f;
+    float vorticityConst = 20.0f;
   int pressureIters = 50;        // Default value for pressure iterations
 
   // 场景：中心球体半径（cell）。0 表示关闭障碍。
