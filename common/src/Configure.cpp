@@ -169,9 +169,9 @@ namespace PIC3dPara
   float sphereRadiusCells = 3.5f;
 
     // 风：默认关闭（0）。正值向 +X 吹。
-    float windX = 0.0f;
+    float windX = 500.0f;
 
-  int particlesPerStep = 500;
+  int particlesPerStep = 5000;
   float emissionJitter = 0.3f;
   float wallRestitution = 0.1f;
   int emitterRadius = 5;
