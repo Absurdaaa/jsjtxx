@@ -547,27 +547,34 @@ namespace FluidSimulation
 				ImGui::Separator();
 
 				ImGui::Text("Sources:");
-				for (int i = 0; i < Eulerian3dPara::source.size(); i++) {
+				for (int i = 0; i < PIC3dPara::source.size(); i++) {
 					ImGui::Text(("source grid " + std::to_string(i)).c_str());
 					ImGui::PushID(i);
 					ImGui::SameLine();
 					if (ImGui::Button("delete")) {
-						Eulerian3dPara::source.erase(Eulerian3dPara::source.begin() + i);
+						PIC3dPara::source.erase(PIC3dPara::source.begin() + i);
 						i--;
 					}
 					else {
-						ImGui::InputInt3("position(x,y,z)", &Eulerian3dPara::source[i].position.x);
-						ImGui::InputFloat3("velocity(x,y,z)", &Eulerian3dPara::source[i].velocity.x);
-						ImGui::InputScalar("density", ImGuiDataType_Float, &Eulerian3dPara::source[i].density, &floatStep1, NULL);
-						ImGui::InputScalar("temperature", ImGuiDataType_Float, &Eulerian3dPara::source[i].temp, &floatStep1, NULL);
+						ImGui::InputInt3("position(x,y,z)", &PIC3dPara::source[i].position.x);
+						ImGui::InputFloat3("velocity(x,y,z)", &PIC3dPara::source[i].velocity.x);
+						ImGui::InputScalar("density", ImGuiDataType_Float, &PIC3dPara::source[i].density, &floatStep1, NULL);
+						ImGui::InputScalar("temperature", ImGuiDataType_Float, &PIC3dPara::source[i].temp, &floatStep1, NULL);
 					}
 					ImGui::PopID();
 					ImGui::Text("---------------------------------");
 				}
 
 				if (ImGui::Button("add source grid")) {
-					Eulerian3dPara::source.push_back(Eulerian3dPara::SourceSmoke({}));
+					PIC3dPara::source.push_back(PIC3dPara::SourceSmoke({}));
 				}
+
+				ImGui::Separator();
+				ImGui::Text("Renderer:");
+				PIC3dPara::drawModel = 2;
+				ImGui::Text("Volume: ray-march 3D density texture");
+
+				ImGui::SliderFloat("Contrast", &PIC3dPara::contrast, 0.0f, 3.0f);
 
 				ImGui::Text("note: Please rerun after setting");
 

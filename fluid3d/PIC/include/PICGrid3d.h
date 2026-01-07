@@ -8,6 +8,7 @@
 #define __PIC_GRID_3D_H__
 
 #include "MACGrid3d.h"
+#include "GridData3d.h"
 #include "Configure.h"
 
 namespace FluidSimulation
@@ -27,6 +28,9 @@ namespace FluidSimulation
         {
         public:
             PICGrid3d();
+
+            // 使用 PIC3dPara 的 sources 更新密度/温度/速度（隐藏基类版本）
+            void updateSources();
 
             // 重新初始化（隐藏基类版本），确保使用 PIC3d 的场景固体
             void initialize();

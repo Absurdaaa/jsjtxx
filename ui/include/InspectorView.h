@@ -18,6 +18,9 @@
 #include "Logger.h"
 #include "DebugCapture.h"
 
+// InspectorView.cpp 直接访问 Glb::Camera 的成员，确保此处可见完整定义。
+#include "Camera.h"
+
 #include <iostream>
 #include <string>
 

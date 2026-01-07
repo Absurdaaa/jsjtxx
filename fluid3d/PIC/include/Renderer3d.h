@@ -1,21 +1,24 @@
 /**
  * Renderer3d.h: 3D PIC 渲染器头文件
- * 定义粒子系统的 OpenGL 渲染类
+ * 仅保留 Volume 体渲染：将密度上传为 3D texture，并在片元着色器中做 ray marching。
  */
 
 #pragma once
 #ifndef __PIC_3D_RENDERER_H__
 #define __PIC_3D_RENDERER_H__
 
+#include <vector>
+
 #include <glm/glm.hpp>
 #include <glad/glad.h>
-#include "glfw3.h"
+
+#include "Configure.h"
 #include "Shader.h"
 #include "Container.h"
 #include "Camera.h"
-#include "Global.h"
-#include "Configure.h"
+
 #include "ParticleSystem3d.h"
+#include "PICGrid3d.h"
 
 namespace FluidSimulation
 {
@@ -23,12 +26,13 @@ namespace FluidSimulation
     {
         /**
          * 3D PIC 渲染器类
-         * 负责将粒子系统渲染到帧缓冲
+         * 输出：一张 2D 纹理（FBO color attachment），SceneView 直接显示。
          */
         class Renderer3d
         {
         public:
-            Renderer3d() {}
+            Renderer3d();
+            ~Renderer3d();
 
             /**
              * 初始化渲染器
@@ -45,24 +49,33 @@ namespace FluidSimulation
              * 绘制粒子系统
              * @param ps 粒子系统引用
              */
-            void draw(ParticleSystem3d &ps);
+            void draw(const ParticleSystem3d &ps, PICGrid3d &grid);
 
         private:
-            /**
-             * 创建顶点数组对象
-             */
-            void MakeVertexArrays();
+            void initGLResources();
 
-            Glb::Shader *shader = nullptr;      // 着色器：用于渲染粒子（顶点/片段着色器）
-            Glb::Container *container = nullptr; // 容器边框：可视化仿真域边界
+            // --- volume rendering (true 3D) ---
+            void ensureDensityTexture3D(PICGrid3d &grid);
+            void uploadDensityTexture3D(PICGrid3d &grid);
 
-            GLuint FBO = 0;        // 帧缓冲对象：渲染目标的 FBO
-            GLuint RBO = 0;        // 渲染缓冲对象：深度/模板缓冲
-            GLuint VAO = 0;        // 顶点数组对象：描述顶点属性布局
-            GLuint VBO = 0;        // 顶点缓冲对象：存放粒子数据的 GPU 缓冲
-            GLuint textureID = 0;  // 渲染目标纹理：最终渲染输出的贴图 ID
+            // 渲染输出（FBO -> textureID），SceneView 直接显示这张纹理
+            GLuint FBO = 0;
+            GLuint RBO = 0;
+            GLuint textureID = 0;
 
-            int32_t particleNum = 0;  // 粒子数量：当前上传到 GPU 的粒子数
+            // 体渲染：3D 密度纹理 (R32F)
+            GLuint densityTex3D = 0;
+            int densityNx = 0;
+            int densityNy = 0;
+            int densityNz = 0;
+            std::vector<float> densityData;
+
+            // 体渲染：全屏三角形
+            GLuint volumeVAO = 0;
+            Glb::Shader *volumeShader = nullptr;
+            Glb::Container *container = nullptr;
+
+            bool inited = false;
         };
     }
 }

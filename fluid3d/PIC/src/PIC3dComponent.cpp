@@ -77,7 +77,7 @@ namespace FluidSimulation
          */
         GLuint PIC3dComponent::getRenderedTexture()
         {
-            renderer->draw(*particleSystem);
+            renderer->draw(*particleSystem, *grid);
             return renderer->getRenderedTexture();
         }
     }

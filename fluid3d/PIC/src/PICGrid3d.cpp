@@ -6,6 +6,7 @@
  */
 
 #include "PIC/include/PICGrid3d.h"
+#include "GridData3d.h"
 #include <cmath>
 namespace FluidSimulation
 {
@@ -93,6 +94,49 @@ namespace FluidSimulation
                 return 1;
 
             return 0;
+        }
+
+        void PICGrid3d::updateSources()
+        {
+            const int nx = dim[Eulerian3d::MACGrid3d::X];
+            const int ny = dim[Eulerian3d::MACGrid3d::Y];
+            const int nz = dim[Eulerian3d::MACGrid3d::Z];
+
+            const int radius = PIC3dPara::emitterRadius;
+
+            for (const auto &src : PIC3dPara::source)
+            {
+                const int cx = src.position.x;
+                const int cy = src.position.y;
+                const int cz = src.position.z;
+
+                // 做一个薄的 x 厚度（类似 2D 的 dx=-1..1），在 y-z 平面做圆盘覆盖
+                for (int dx = -1; dx <= 1; ++dx)
+                {
+                    for (int dy = -radius; dy <= radius; ++dy)
+                    {
+                        for (int dz = -radius; dz <= radius; ++dz)
+                        {
+                            if (radius > 0 && (dy * dy + dz * dz > radius * radius))
+                                continue;
+
+                            const int x = cx + dx;
+                            const int y = cy + dy;
+                            const int z = cz + dz;
+                            if (x < 0 || x >= nx || y < 0 || y >= ny || z < 0 || z >= nz)
+                                continue;
+                            if (isSolidCell(x, y, z))
+                                continue;
+
+                            mT(x, y, z) = src.temp;
+                            mD(x, y, z) = src.density;
+                            mU(x, y, z) = src.velocity.x;
+                            mV(x, y, z) = src.velocity.y;
+                            mW(x, y, z) = src.velocity.z;
+                        }
+                    }
+                }
+            }
         }
 
         float PICGrid3d::sphereSDF(const glm::vec3 &pt) const

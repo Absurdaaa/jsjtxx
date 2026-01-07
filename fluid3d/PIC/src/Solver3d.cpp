@@ -50,6 +50,8 @@ namespace FluidSimulation
             mV_prev = mGrid.mV;
             mW_prev = mGrid.mW;
 
+            mGrid.updateSources();
+
             // 6. 添加外力（浮力）
             addForces(dt);
 
