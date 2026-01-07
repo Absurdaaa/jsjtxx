@@ -38,6 +38,9 @@ namespace Eulerian2dPara
     float ambientTemp = 0.0;       // �����¶�
     float boussinesqAlpha = 500.0; // Boussinesq����ʽ�е�alpha����
     float boussinesqBeta = 2500.0; // Boussinesq����ʽ�е�beta����
+
+    // 涡量增强系数（0 表示关闭）
+    float vorticityConst = 0.0f;
 }
 
 // 3Dŷ��������ز���
@@ -75,6 +78,9 @@ namespace Eulerian3dPara
     float ambientTemp = 0.0;        // �����¶�
     float boussinesqAlpha = 500.0;  // Boussinesq����ʽ�е�alpha����
     float boussinesqBeta = 2500.0;  // Boussinesq����ʽ�е�beta����
+
+    // 涡量增强系数（0 表示关闭）
+    float vorticityConst = 0.0f;
 }
 
 // 2D PIC 混合方法参数
@@ -109,13 +115,16 @@ namespace PIC2dPara
   float boussinesqAlpha = 500.0; // Boussinesq����ʽ�е�alpha����
   float boussinesqBeta = 2500.0; // Boussinesq����ʽ�е�beta����
 
-  int particlesPerStep = 5000;
+    // 涡量增强系数（0 表示关闭；常用范围 1~50，取决于尺度/步长）
+    float vorticityConst = 20.0f;
+
+  int particlesPerStep = 500;
   float emissionJitter = 0.3f;
   float wallRestitution = 0.1f;
-    int emitterRadius = 20; // 发射源半径（格子数），1 表示覆盖中心及邻格
+    int emitterRadius = 10; // 发射源半径（格子数），1 表示覆盖中心及邻格
 
     // 风：默认关闭（0）。如果你希望一直向右吹，可以设为正值（例如 50~200）
-    float windX = 0.0f;
+    float windX = 500.0f;
 }
 
 // 3D PIC 混合方法参数
@@ -151,6 +160,9 @@ namespace PIC3dPara
   float ambientTemp = 0.0;       // �����¶�
   float boussinesqAlpha = 500.0; // Boussinesq����ʽ�е�alpha����
   float boussinesqBeta = 2500.0; // Boussinesq����ʽ�е�beta����
+
+    // 涡量增强系数（0 表示关闭）
+    float vorticityConst = 0.0f;
   int pressureIters = 50;        // Default value for pressure iterations
 
   // 场景：中心球体半径（cell）。0 表示关闭障碍。

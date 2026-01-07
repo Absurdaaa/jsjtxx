@@ -304,7 +304,8 @@ namespace FluidSimulation
 				ImGui::SliderFloat("Emission Jitter (cell)", &PIC2dPara::emissionJitter, 0.0f, 1.0f);
 				ImGui::InputInt("Emitter Radius (cells)", &PIC2dPara::emitterRadius);
 				ImGui::SliderFloat("Wall Restitution", &PIC2dPara::wallRestitution, 0.0f, 1.0f);
-				ImGui::SliderFloat("Wind X (accel)", &PIC2dPara::windX, -100000.0f, 100000.0f, "%.3f");
+				ImGui::SliderFloat("Wind X (accel)", &PIC2dPara::windX, -1000.0f, 1000.0f, "%.3f");
+				ImGui::SliderFloat("Vorticity Confinement", &PIC2dPara::vorticityConst, 0.0f, 50.0f, "%.3f");
 				ImGui::Separator();
 				ImGui::Text("MAC grid:");
 				ImGui::PushItemWidth(150);
@@ -531,6 +532,7 @@ namespace FluidSimulation
 					ImGui::SliderFloat("Sphere Radius (cells)", &PIC3dPara::sphereRadiusCells, 0.0f, maxR, "%.2f");
 				}
 				ImGui::SliderFloat("Wall Restitution", &PIC3dPara::wallRestitution, 0.0f, 1.0f);
+				ImGui::SliderFloat("Vorticity Confinement", &PIC3dPara::vorticityConst, 0.0f, 50.0f, "%.3f");
 				ImGui::InputInt("Pressure Iters", &PIC3dPara::pressureIters);
 				ImGui::Separator();
 				ImGui::Text("MAC grid:");

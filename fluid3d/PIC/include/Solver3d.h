@@ -9,6 +9,7 @@
 
 #include "ParticleSystem3d.h"
 #include "PICGrid3d.h"
+#include "../../../common/include/GridData3d.h"
 #include "Configure.h"
 
 namespace FluidSimulation

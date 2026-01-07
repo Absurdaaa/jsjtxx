@@ -4,6 +4,7 @@
 
 #include "ParticleSystem.h"
 #include "PICGrid2d.h"
+#include "../../../common/include/GridData2d.h"
 #include "Configure.h"
 
 namespace FluidSimulation
@@ -70,6 +71,9 @@ namespace FluidSimulation
              * @param dt 时间步长
              */
             void advectParticles(double dt);
+
+            // 涡量增强（Vorticity Confinement）：在投影前加入旋涡细节
+            void applyVorticityConfinement(double dt);
         };
     }
 }

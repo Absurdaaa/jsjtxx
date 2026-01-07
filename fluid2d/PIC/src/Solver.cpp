@@ -1,6 +1,7 @@
 #include "PIC/include/Solver.h"
-#include "GridData2d.h"
+#include "../../../common/include/GridData2d.h"
 #include <cmath>
+#include <vector>
 
 namespace FluidSimulation
 {
@@ -38,6 +39,10 @@ namespace FluidSimulation
 
       // 6. 添加外力（浮力）
       addForces(dt);
+
+      // 6.5 涡量增强（可选，vorticityConst=0 时不生效）
+      if (PIC2dPara::vorticityConst > 0.0f)
+        applyVorticityConfinement(dt);
 
       // 7. 压力投影（保证不可压缩）
       pressureProjection(dt);
@@ -163,6 +168,145 @@ namespace FluidSimulation
         {
           mGrid.mT(i, j) = newT(i, j);
           mGrid.mD(i, j) = newD(i, j);
+        }
+      }
+
+      // 右侧为出口：将最右一列标量清空，避免“边界残留”在流场变化时表现为持续产烟
+      // （半拉格朗日平流在开边界处不守恒，最简单稳定的 outflow 处理就是做一个吸收边界）
+      const int iExit = nx - 1;
+      if (iExit >= 0)
+      {
+        for (int j = 0; j < ny; ++j)
+        {
+          mGrid.mT(iExit, j) = PIC2dPara::ambientTemp;
+          mGrid.mD(iExit, j) = 0.0;
+        }
+      }
+    }
+
+    // ==================== 涡量增强（Vorticity Confinement） ====================
+    void Solver::applyVorticityConfinement(double dt)
+    {
+      const int nx = mGrid.dim[PICGrid2d::X];
+      const int ny = mGrid.dim[PICGrid2d::Y];
+      const float h = mGrid.cellSize;
+      const float eps = PIC2dPara::vorticityConst;
+      if (eps <= 0.0f || nx <= 1 || ny <= 1) return;
+
+      auto idx = [nx](int i, int j) { return i + j * nx; };
+      std::vector<float> omega(nx * ny, 0.0f);
+      std::vector<float> mag(nx * ny, 0.0f);
+      std::vector<float> fx(nx * ny, 0.0f);
+      std::vector<float> fy(nx * ny, 0.0f);
+
+      auto uCenter = [&](int i, int j) -> float {
+        // 单元中心 (i+0.5, j+0.5) 的 u：平均左右两个竖直面速度
+        float uL = (mGrid.isSolidFace(i, j, PICGrid2d::X) ? 0.0f : (float)mGrid.mU(i, j));
+        float uR = (mGrid.isSolidFace(i + 1, j, PICGrid2d::X) ? 0.0f : (float)mGrid.mU(i + 1, j));
+        return 0.5f * (uL + uR);
+      };
+      auto vCenter = [&](int i, int j) -> float {
+        // 单元中心 (i+0.5, j+0.5) 的 v：平均上下两个水平面速度
+        float vB = (mGrid.isSolidFace(i, j, PICGrid2d::Y) ? 0.0f : (float)mGrid.mV(i, j));
+        float vT = (mGrid.isSolidFace(i, j + 1, PICGrid2d::Y) ? 0.0f : (float)mGrid.mV(i, j + 1));
+        return 0.5f * (vB + vT);
+      };
+
+      // 1) 计算单元中心涡量 ω = dv/dx - du/dy
+      for (int j = 0; j < ny; ++j)
+      {
+        for (int i = 0; i < nx; ++i)
+        {
+          if (mGrid.isSolidCell(i, j))
+            continue;
+
+          float dvdx;
+          if (i == 0) dvdx = (vCenter(1, j) - vCenter(0, j)) / h;
+          else if (i == nx - 1) dvdx = (vCenter(nx - 1, j) - vCenter(nx - 2, j)) / h;
+          else dvdx = (vCenter(i + 1, j) - vCenter(i - 1, j)) / (2.0f * h);
+
+          float dudy;
+          if (j == 0) dudy = (uCenter(i, 1) - uCenter(i, 0)) / h;
+          else if (j == ny - 1) dudy = (uCenter(i, ny - 1) - uCenter(i, ny - 2)) / h;
+          else dudy = (uCenter(i, j + 1) - uCenter(i, j - 1)) / (2.0f * h);
+
+          float w = dvdx - dudy;
+          omega[idx(i, j)] = w;
+          mag[idx(i, j)] = std::fabs(w);
+        }
+      }
+
+      // 2) 计算 ∇|ω|，并得到 confinement 力 f = eps * h * (N × ω)
+      for (int j = 0; j < ny; ++j)
+      {
+        for (int i = 0; i < nx; ++i)
+        {
+          if (mGrid.isSolidCell(i, j))
+            continue;
+
+          auto magAt = [&](int ii, int jj) -> float {
+            if (ii < 0) ii = 0;
+            if (ii > nx - 1) ii = nx - 1;
+            if (jj < 0) jj = 0;
+            if (jj > ny - 1) jj = ny - 1;
+            return mag[idx(ii, jj)];
+          };
+
+          float Nx;
+          if (i == 0) Nx = (magAt(1, j) - magAt(0, j)) / h;
+          else if (i == nx - 1) Nx = (magAt(nx - 1, j) - magAt(nx - 2, j)) / h;
+          else Nx = (magAt(i + 1, j) - magAt(i - 1, j)) / (2.0f * h);
+
+          float Ny;
+          if (j == 0) Ny = (magAt(i, 1) - magAt(i, 0)) / h;
+          else if (j == ny - 1) Ny = (magAt(i, ny - 1) - magAt(i, ny - 2)) / h;
+          else Ny = (magAt(i, j + 1) - magAt(i, j - 1)) / (2.0f * h);
+
+          float len = std::sqrt(Nx * Nx + Ny * Ny);
+          if (len < 1e-6f)
+            continue;
+          Nx /= len;
+          Ny /= len;
+
+          float w = omega[idx(i, j)];
+          // N × (ω k) = (Ny * ω, -Nx * ω)
+          fx[idx(i, j)] = eps * h * (Ny * w);
+          fy[idx(i, j)] = eps * h * (-Nx * w);
+        }
+      }
+
+      // 3) 将中心力平均到 MAC 面上并加到速度场（投影前）
+      // U faces: i = 0..nx, j = 0..ny-1
+      for (int j = 0; j < ny; ++j)
+      {
+        for (int i = 0; i <= nx; ++i)
+        {
+          if (mGrid.isSolidFace(i, j, PICGrid2d::X))
+            continue;
+
+          float f;
+          if (i == 0) f = fx[idx(0, j)];
+          else if (i == nx) f = fx[idx(nx - 1, j)];
+          else f = 0.5f * (fx[idx(i - 1, j)] + fx[idx(i, j)]);
+
+          mGrid.mU(i, j) += (double)dt * (double)f;
+        }
+      }
+
+      // V faces: i = 0..nx-1, j = 0..ny
+      for (int j = 0; j <= ny; ++j)
+      {
+        for (int i = 0; i < nx; ++i)
+        {
+          if (mGrid.isSolidFace(i, j, PICGrid2d::Y))
+            continue;
+
+          float f;
+          if (j == 0) f = fy[idx(i, 0)];
+          else if (j == ny) f = fy[idx(i, ny - 1)];
+          else f = 0.5f * (fy[idx(i, j - 1)] + fy[idx(i, j)]);
+
+          mGrid.mV(i, j) += (double)dt * (double)f;
         }
       }
     }
