@@ -228,21 +228,33 @@ namespace FluidSimulation
             //             mGrid.mW(i, j, k) += dt * buoy;
             //         }
 
-            // 在X方向添加风力
+            // wind (X direction)
+            // windX > 0: 向 +X；windX < 0: 向 -X
+            const double windX = (double)PIC3dPara::windX;
             for (int k = 0; k < nz; ++k)
                 for (int j = 0; j < ny; ++j)
-                    for (int i = 1; i < nx; ++i)
-                    {
-                        glm::vec3 pos((i)* h, (j + 0.5f) * h, (k + 0.5f) * h);
-                        double windForce = 10;
-                        mGrid.mU(i, j, k) += dt * windForce;
-                    }
+                    for (int i = 1; i < nx; ++i) // U: i=0 与 i=nx 通常是边界面
+                        mGrid.mU(i, j, k) += dt * windX;
 
             // 边界速度设为 0
+            // 左侧 X 边界是墙，但“源区域”除外（避免把喷口速度直接抹掉）
             for (int k = 0; k < nz; ++k)
                 for (int j = 0; j < ny; ++j)
                 {
-                    mGrid.mU(0, j, k) = 0.0;
+                    bool isSource = false;
+                    for (const auto &src : PIC3dPara::source)
+                    {
+                        const int cy = src.position.y;
+                        const int cz = src.position.z;
+                        const int r = PIC3dPara::emitterRadius;
+                        if (j >= cy - r && j <= cy + r && k >= cz - r && k <= cz + r)
+                        {
+                            isSource = true;
+                            break;
+                        }
+                    }
+                    if (!isSource)
+                        mGrid.mU(0, j, k) = 0.0;
                 }
             for (int k = 0; k < nz; ++k)
                 for (int i = 0; i < nx; ++i)

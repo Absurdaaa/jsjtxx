@@ -215,6 +215,9 @@ namespace PIC3dPara
   extern float emissionJitter;
   extern float wallRestitution;
     extern int emitterRadius; // 发射源半径（以格子为单位），0 表示单格
+
+    // 外力：风（+X 为正）。单位建议理解为“加速度”(world units / s^2)
+    extern float windX;
 }
 
 /**

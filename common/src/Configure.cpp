@@ -168,6 +168,9 @@ namespace PIC3dPara
   // 场景：中心球体半径（cell）。0 表示关闭障碍。
   float sphereRadiusCells = 3.5f;
 
+    // 风：默认关闭（0）。正值向 +X 吹。
+    float windX = 0.0f;
+
   int particlesPerStep = 500;
   float emissionJitter = 0.3f;
   float wallRestitution = 0.1f;
