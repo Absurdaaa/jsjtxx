@@ -6,3 +6,4 @@ out/
 out/build
 .vs/code/
 build
+.DS_Store
